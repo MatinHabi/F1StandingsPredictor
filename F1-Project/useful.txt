@@ -1,0 +1,72 @@
+
+
+
+   DriverNumber BroadcastName Abbreviation        DriverId         TeamName TeamColor        TeamId  FirstName    LastName           FullName  Position ClassifiedPosition  GridPosition  Q1  Q2  Q3                   Time         Status  Points  Laps
+4             4      L NORRIS          NOR          norris          McLaren    F47600       mclaren      Lando      Norris       Lando Norris       1.0                  1           1.0 NaT NaT NaT 0 days 01:23:47.693000       Finished    25.0  70.0
+81           81     O PIASTRI          PIA         piastri          McLaren    F47600       mclaren      Oscar     Piastri      Oscar Piastri       2.0                  2           3.0 NaT NaT NaT 0 days 00:00:02.695000       Finished    18.0  70.0
+16           16     C LECLERC          LEC         leclerc          Ferrari    ED1131       ferrari    Charles     Leclerc    Charles Leclerc       3.0                  3           2.0 NaT NaT NaT 0 days 00:00:19.820000       Finished    15.0  70.0
+44           44    L HAMILTON          HAM        hamilton          Ferrari    ED1131       ferrari      Lewis    Hamilton     Lewis Hamilton       4.0                  4           4.0 NaT NaT NaT 0 days 00:00:29.020000       Finished    12.0  70.0
+63           63     G RUSSELL          RUS         russell         Mercedes    00D7B6      mercedes     George     Russell     George Russell       5.0                  5           5.0 NaT NaT NaT 0 days 00:01:02.396000       Finished    10.0  70.0
+30           30      L LAWSON          LAW          lawson     Racing Bulls    6C98FF            rb       Liam      Lawson        Liam Lawson       6.0                  6           6.0 NaT NaT NaT 0 days 00:01:07.754000       Finished     8.0  70.0
+14           14      F ALONSO          ALO          alonso     Aston Martin    229971  aston_martin   Fernando      Alonso    Fernando Alonso       7.0                  7          11.0 NaT NaT NaT 0 days 00:00:01.437000         Lapped     6.0  69.0
+5             5   G BORTOLETO          BOR       bortoleto      Kick Sauber    01C00E        sauber    Gabriel   Bortoleto  Gabriel Bortoleto       8.0                  8           8.0 NaT NaT NaT 0 days 00:00:01.952000         Lapped     4.0  69.0
+27           27  N HULKENBERG          HUL      hulkenberg      Kick Sauber    01C00E        sauber       Nico  Hulkenberg    Nico Hulkenberg       9.0                  9          20.0 NaT NaT NaT 0 days 00:00:07.720000         Lapped     2.0  69.0
+31           31        E OCON          OCO            ocon     Haas F1 Team    9C9FA2          haas    Esteban        Ocon       Esteban Ocon      10.0                 10          17.0 NaT NaT NaT 0 days 00:00:09.986000         Lapped     1.0  69.0
+87           87     O BEARMAN          BEA         bearman     Haas F1 Team    9C9FA2          haas     Oliver     Bearman     Oliver Bearman      11.0                 11          15.0 NaT NaT NaT 0 days 00:00:24.854000         Lapped     0.0  69.0
+6             6      I HADJAR          HAD          hadjar     Racing Bulls    6C98FF            rb      Isack      Hadjar       Isack Hadjar      12.0                 12          13.0 NaT NaT NaT 0 days 00:00:27.957000         Lapped     0.0  69.0
+10           10       P GASLY          GAS           gasly           Alpine    00A1E8        alpine     Pierre       Gasly       Pierre Gasly      13.0                 13          10.0 NaT NaT NaT 0 days 00:00:33.055000         Lapped     0.0  69.0
+18           18      L STROLL          STR          stroll     Aston Martin    229971  aston_martin      Lance      Stroll       Lance Stroll      14.0                 14          16.0 NaT NaT NaT 0 days 00:00:34.462000         Lapped     0.0  69.0
+43           43   F COLAPINTO          COL       colapinto           Alpine    00A1E8        alpine     Franco   Colapinto   Franco Colapinto      15.0                 15          14.0 NaT NaT NaT 0 days 00:00:42.692000         Lapped     0.0  69.0
+22           22     Y TSUNODA          TSU         tsunoda  Red Bull Racing    4781D7      red_bull       Yuki     Tsunoda       Yuki Tsunoda      16.0                 16          18.0 NaT NaT NaT 0 days 00:00:02.979000         Lapped     0.0  68.0
+23           23       A ALBON          ALB           albon         Williams    1868DB      williams  Alexander       Albon    Alexander Albon      17.0                  R          12.0 NaT NaT NaT                    NaT        Retired     0.0  15.0
+1             1  M VERSTAPPEN          VER  max_verstappen  Red Bull Racing    4781D7      red_bull        Max  Verstappen     Max Verstappen      18.0                  R           7.0 NaT NaT NaT                    NaT        Retired     0.0   0.0
+12           12   K ANTONELLI          ANT       antonelli         Mercedes    00D7B6      mercedes       Kimi   Antonelli     Kimi Antonelli      19.0                  R           9.0 NaT NaT NaT                    NaT        Retired     0.0   0.0
+55           55       C SAINZ          SAI           sainz         Williams    1868DB      williams     Carlos       Sainz       Carlos Sainz      20.0                  W          19.0 NaT NaT NaT                    NaT  Did not start     0.0   0.0
+
+
+
+   DriverNumber                   Time         Status  Points
+4             4 0 days 01:23:47.693000       Finished    25.0
+81           81 0 days 00:00:02.695000       Finished    18.0
+16           16 0 days 00:00:19.820000       Finished    15.0
+44           44 0 days 00:00:29.020000       Finished    12.0
+63           63 0 days 00:01:02.396000       Finished    10.0
+30           30 0 days 00:01:07.754000       Finished     8.0
+14           14 0 days 00:00:01.437000         Lapped     6.0
+5             5 0 days 00:00:01.952000         Lapped     4.0
+27           27 0 days 00:00:07.720000         Lapped     2.0
+31           31 0 days 00:00:09.986000         Lapped     1.0
+87           87 0 days 00:00:24.854000         Lapped     0.0
+6             6 0 days 00:00:27.957000         Lapped     0.0
+10           10 0 days 00:00:33.055000         Lapped     0.0
+18           18 0 days 00:00:34.462000         Lapped     0.0
+43           43 0 days 00:00:42.692000         Lapped     0.0
+22           22 0 days 00:00:02.979000         Lapped     0.0
+23           23                    NaT        Retired     0.0
+1             1                    NaT        Retired     0.0
+12           12                    NaT        Retired     0.0
+55           55                    NaT  Did not start     0.0
+
+
+
+           TeamName                   Time         Status  Points
+4           McLaren 0 days 01:23:47.693000       Finished    25.0
+81          McLaren 0 days 00:00:02.695000       Finished    18.0
+16          Ferrari 0 days 00:00:19.820000       Finished    15.0
+44          Ferrari 0 days 00:00:29.020000       Finished    12.0
+63         Mercedes 0 days 00:01:02.396000       Finished    10.0
+30     Racing Bulls 0 days 00:01:07.754000       Finished     8.0
+14     Aston Martin 0 days 00:00:01.437000         Lapped     6.0
+5       Kick Sauber 0 days 00:00:01.952000         Lapped     4.0
+27      Kick Sauber 0 days 00:00:07.720000         Lapped     2.0
+31     Haas F1 Team 0 days 00:00:09.986000         Lapped     1.0
+87     Haas F1 Team 0 days 00:00:24.854000         Lapped     0.0
+6      Racing Bulls 0 days 00:00:27.957000         Lapped     0.0
+10           Alpine 0 days 00:00:33.055000         Lapped     0.0
+18     Aston Martin 0 days 00:00:34.462000         Lapped     0.0
+43           Alpine 0 days 00:00:42.692000         Lapped     0.0
+22  Red Bull Racing 0 days 00:00:02.979000         Lapped     0.0
+23         Williams                    NaT        Retired     0.0
+1   Red Bull Racing                    NaT        Retired     0.0
+12         Mercedes                    NaT        Retired     0.0
+55         Williams                    NaT  Did not start     0.0

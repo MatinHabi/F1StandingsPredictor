@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Virtual environment
+.venv/
+venv/
+
+# FastF1 cache (large, regenerates itself)
+cache/
+
+# Editor / OS
+.vscode/
+.DS_Store

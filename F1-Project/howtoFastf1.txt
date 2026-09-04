@@ -1,0 +1,53 @@
+Formula 1 Weekend Session Abbreviations for FastF1:
+
+Free Practice Sessions:
+* FP1: Free Practice 1. The opening 60-minute session on Friday for car upgrades and setup.
+* FP2: Free Practice 2. The second 60-minute Friday session for qualifying simulations and long runs.
+* FP3: Free Practice 3. The final 60-minute session on Saturday morning for last-minute setup tweaks.
+
+Competitive Sessions:
+* Q: Qualifying. The traditional Saturday knockout session (Q1, Q2, Q3) determining Sunday's grid.
+* SQ: Sprint Qualifying. A shorter knockout session determining the grid for the Sprint race.
+* R: Race. The main Grand Prix held on Sunday where full championship points are awarded.
+* S: Sprint. The short Saturday race held during Sprint Weekends.
+
+
+========================================= Code Example =========================================
+
+import fastf1
+from fastf1 import plotting
+import matplotlib.pyplot as plt
+
+# 1. Enable caching in a local directory 
+fastf1.Cache.enable_cache('fastf1_cache') 
+
+# 2. Load a specific session (Year, Circuit, Session Type)
+# Session types: 'FP1', 'FP2', 'FP3', 'Q', 'SQ', 'R' (Race)
+session = fastf1.get_session(2025, 'Las Vegas', 'R')
+session.load()
+
+# 3. Get overall session results
+print(session.results[['DriverNumber', 'BroadcastName', 'Abbreviation', 'Position']])
+
+# 4. Target a specific driver's fastest lap (e.g., Lewis Hamilton 'HAM')
+fastest_lap = session.laps.pick_driver('HAM').pick_fastest()
+
+# 5. Extract high-frequency telemetry data for that lap
+telemetry = fastest_lap.get_telemetry()
+
+# The telemetry object is an extended Pandas DataFrame
+print(telemetry[['Speed', 'RPM', 'Throttle', 'Brake', 'Gear', 'X', 'Y']])
+=== PLOTTING === 
+# Setup FastF1 styling configuration
+plotting.setup_mpl()
+
+# Plot Distance vs Speed
+plt.figure(figsize=(10, 5))
+plt.plot(telemetry['Distance'], telemetry['Speed'], label='HAM - Fastest Lap')
+
+plt.title(f"Speed Profile - {session.event['EventName']} {session.event.year}")
+plt.xlabel('Distance in meters')
+plt.ylabel('Speed (km/h)')
+plt.legend()
+plt.grid(True)
+plt.show()
