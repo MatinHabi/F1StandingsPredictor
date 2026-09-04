@@ -12,6 +12,6 @@ tbl = session.results.drop(columns=['HeadshotUrl', 'CountryCode'])
 
 
 cols = ['TeamName','Time','Status','Points']
-print(f"\n\n\n{session.results[cols].to_string()}")
+#print(f"\n\n\n{session.results[cols].to_string()}")
 
-
+print(f"{f.get_event_schedule(2024)[['Location']]}")

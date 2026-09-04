@@ -70,3 +70,35 @@
 1   Red Bull Racing                    NaT        Retired     0.0
 12         Mercedes                    NaT        Retired     0.0
 55         Williams                    NaT  Did not start     0.0
+
+
+
+
+             Location
+0              Sakhir
+1              Sakhir
+2              Jeddah
+3           Melbourne
+4              Suzuka
+5            Shanghai
+6               Miami
+7               Imola
+8              Monaco
+9            Montréal
+10          Barcelona
+11          Spielberg
+12        Silverstone
+13           Budapest
+14  Spa-Francorchamps
+15          Zandvoort
+16              Monza
+17               Baku
+18         Marina Bay
+19             Austin
+20        Mexico City
+21          São Paulo
+22          Las Vegas
+23             Lusail
+24         Yas Island
+
+

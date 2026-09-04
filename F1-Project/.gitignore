@@ -9,6 +9,8 @@ venv/
 
 # FastF1 cache (large, regenerates itself)
 cache/
+VER_cache/
+*.sqlite
 
 # Editor / OS
 .vscode/
