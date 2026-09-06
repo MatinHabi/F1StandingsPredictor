@@ -1,17 +1,16 @@
 import fastf1 as f
-from fastf1 import plotting
-import matplotlib.pyplot as plt
+import pandas as pd
 
 f.Cache.enable_cache('fastf1_cache')
 
-session = f.get_session(2025, 'Austria', 'R')
-session.load()
+session = f.get_session(2024,'Austria','R')
+session.load(telemetry=False,weather=False,messages=False)
 
-tbl = session.results.drop(columns=['HeadshotUrl', 'CountryCode'])
-#print(f"\n\n\n{tbl.to_string()}")
+ver = session.laps.pick_driver('VER')[['LapNumber', 'LapTime']]
+lapT = ver['LapTime'].dt.total_seconds()
+ver['LapTime'] = lapT
+ver.to_csv('ver_austria.csv', index=False)
 
-
-cols = ['TeamName','Time','Status','Points']
-#print(f"\n\n\n{session.results[cols].to_string()}")
-
-print(f"{f.get_event_schedule(2024)[['Location']]}")
+file = pd.read_csv('ver_austria.csv')
+print(file.dtypes)
+print(file.head())
