@@ -2,25 +2,24 @@ import fastf1 as f
 import pandas as pd
 
 f.Cache.enable_cache("fastf1_cache")
-frames = []
 
-for i in range(2018,2026):
-    session = f.get_session(i, 'Austria', 'R')
-    session.load(telemetry = False, weather = True, messages = False)
+def add_stint(file):
+    #file = pd.read_csv(f'{filename}')
+    file = file.sort_values(['Year', 'LapNumber']).copy()
+    new_stint = file.groupby('Year')['TyreLife'].diff() <= 0 #pinging T when a new stint starts
+    file['Stint'] = new_stint.groupby('Year').cumsum().astype(int) + 1
+    #file.to_csv('stint.csv')
+    return file
 
-    weather = session.weather_data #we need this cuz track_temp isn't part of session
-    driver_session = session.laps.pick_driver('VER')
-    laps = pd.merge_asof(driver_session.sort_values('Time'), weather.sort_values('Time'), on='Time') #this merges the track temp data to the closest time stamp
+def get_driver_laps(year, driver, circuit, session_type='R'):
+    session = f.get_session(year,circuit, session_type)
+    session.load(telemetry=False,weather=True,messages=False)
+    weather = session.weather_data
 
-    driver_laps = laps[['LapNumber','LapTime','TyreLife','TrackTemp','Compound']].copy()
-    driver_laps['Year'] = i
-    lapT = driver_laps['LapTime'].dt.total_seconds()
-    driver_laps['LapTime'] = lapT
-    frames.append(driver_laps)
+    driver_session = session.laps.pick_driver(driver)
+    data = pd.merge_asof(driver_session.sort_values('Time'), weather.sort_values('Time'), on='Time')
 
-data_frame = pd.concat(frames, ignore_index=True)
-data_frame = data_frame.dropna(subset = ['LapNumber','LapTime','TyreLife','TrackTemp','Compound']) #dropping NaNs
-data_frame['Compound'] = data_frame['Compound'].replace('SUPERSOFT', 'SOFT') # replacing SUPERSOFT with SOFT for 2018
-data_frame.to_csv('ver_austria_noNaN.csv', index=False)
-
-
+    driver_laps = data[['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound']].copy()
+    driver_laps['Year'] = year
+    driver_laps['LapTime'] = driver_laps['LapTime'].dt.total_seconds()
+    return driver_laps
