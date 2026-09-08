@@ -1,23 +1,21 @@
 import fastf1 as f
-import pathlib as path
 import pandas as pd
 
-f.Cache.enable_cache("VER_cache")
+f.Cache.enable_cache("fastf1_cache")
 frames = []
 
-for i in range(1,25):
-    session = f.get_session(year=2024,gp= i,identifier='R')
-    session.load(telemetry=False,weather=False, messages=False)
+for i in range(2018,2026):
+    session = f.get_session(i, 'Austria', 'R')
+    session.load(telemetry = False, weather = False, messages = False)
 
-    ver = session.laps.pick_driver('VER')
-    
-    #print("\n\n\n" + '='*20 + f"RACE {session.event['EventName']}" + '='*20 + "\n\n\n")
-    #print(ver[['LapNumber', 'LapTime']].to_string())
+    ver = session.laps.pick_driver('VER')[['LapNumber', 'LapTime']]
+    ver['Year'] = i
+    lapT = ver['LapTime'].dt.total_seconds()
+    ver['LapTime'] = lapT
+    frames.append(ver)
 
-    laps =  pd.DataFrame(ver[['DriverName','LapNumber', 'LapTime']])
+data_frame = pd.concat(frames, ignore_index=True)
 
-    frames.append(laps)
+data_frame.to_csv('ver_austria.csv', index=False)
 
-df = pd.concat(frames, ignore_index=True)
-df.dtypes
-df.to_csv('data.csv', index=False)
+
