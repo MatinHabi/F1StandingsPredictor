@@ -7,7 +7,7 @@ def zscore(filename,column):
 
     file[f'{column}_Zscore'] = (times - times.mean())/times.std()
 
-    file.to_csv('ver_austria_zscors.csv', index = False)
+    file.to_csv('ver_austria_zscores.csv', index = False)
 
 
 def iqr(filename,column):
