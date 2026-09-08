@@ -7,7 +7,7 @@ def add_stint(file):
     #file = pd.read_csv(f'{filename}')
     file = file.sort_values(['Year', 'LapNumber']).copy()
     new_stint = file.groupby('Year')['TyreLife'].diff() <= 0 #pinging T when a new stint starts
-    file['Stint'] = new_stint.groupby('Year').cumsum().astype(int) + 1
+    file['Stint'] = new_stint.groupby(file['Year']).cumsum().astype(int) + 1
     #file.to_csv('stint.csv')
     return file
 
@@ -31,7 +31,7 @@ def build_dataset(driver, circuit, session_type='R', years=range(2018, 2026)):
 
     data_frame = pd.concat(frames, ignore_index=True)
     data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound'])
-    data_frame['Compound'] = data_frame['Compoud'].replace('SUPERSOFT','SOFT')
+    data_frame['Compound'] = data_frame['Compound'].replace('SUPERSOFT','SOFT')
     data_frame = add_stint(data_frame)
 
     data_frame.to_csv(f'{driver}_{circuit}.csv')
