@@ -23,3 +23,17 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
     driver_laps['Year'] = year
     driver_laps['LapTime'] = driver_laps['LapTime'].dt.total_seconds()
     return driver_laps
+
+def build_dataset(driver, circuit, session_type='R', years=range(2018, 2026)):
+    frames = []
+    for y in years:
+        frames.append(get_driver_laps(y,driver,circuit,session_type))
+
+    data_frame = pd.concat(frames, ignore_index=True)
+    data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound'])
+    data_frame['Compound'] = data_frame['Compoud'].replace('SUPERSOFT','SOFT')
+    data_frame = add_stint(data_frame)
+
+    data_frame.to_csv(f'{driver}_{circuit}.csv')
+    return data_frame
+    
