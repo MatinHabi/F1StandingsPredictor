@@ -1,5 +1,6 @@
 import fastf1 as f
 import pandas as pd
+import os
 
 f.Cache.enable_cache("fastf1_cache")
 
@@ -12,6 +13,11 @@ def add_stint(file):
     return file
 
 def get_driver_laps(year, driver, circuit, session_type='R'):
+    event = f.get_event(year,circuit)
+    if (event['F1ApiSupport'] == False):
+        return pd.DataFrame()
+    
+    f.get_session(year,circuit,session_type).get_circuit_info()
     session = f.get_session(year,circuit, session_type)
     session.load(telemetry=False,weather=True,messages=False)
     weather = session.weather_data
@@ -37,19 +43,25 @@ def build_dataset(driver='', circuit='Melbourne', session_type='R', years=range(
     for y in years:
         frames.append(get_driver_laps(y,driver,circuit,session_type))
 
+    non_empty = []
+    for df in frames:
+        if not df.empty:
+            non_empty.append(df)
+
+    frames = non_empty
+
     data_frame = pd.concat(frames, ignore_index=True)
     data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound'])
     data_frame['Compound'] = data_frame['Compound'].replace('SUPERSOFT','SOFT')
     data_frame = add_stint(data_frame)
     
-    filename
-    if(name != None):
-        filename = name
-    elif (driver != ''):
-        filename = f'{driver}_{circuit}.csv'
+    if name is not None:
+        filepath = name
     else:
-        filename = f'all_{circuit}.csv'
+        out_dir = f'./{driver}' if driver else './all'
+        filepath = os.path.join(out_dir, f'{driver or "all"}_{circuit}.csv')
 
-    data_frame.to_csv(filname,index=False)
+    os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
+    data_frame.to_csv(filepath, index=False)
     return data_frame
     
