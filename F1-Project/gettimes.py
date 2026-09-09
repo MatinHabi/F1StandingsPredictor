@@ -32,7 +32,7 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
         
     return driver_laps
 
-def build_dataset(driver='', circuit='Melbourne', session_type='R', years=range(2018, 2026)):
+def build_dataset(driver='', circuit='Melbourne', session_type='R', years=range(2018, 2026), name=None):
     frames = []
     for y in years:
         frames.append(get_driver_laps(y,driver,circuit,session_type))
@@ -42,10 +42,14 @@ def build_dataset(driver='', circuit='Melbourne', session_type='R', years=range(
     data_frame['Compound'] = data_frame['Compound'].replace('SUPERSOFT','SOFT')
     data_frame = add_stint(data_frame)
     
-    if(driver != ''):
-        data_frame.to_csv(f'{driver}_{circuit}.csv', index= False)
+    filename
+    if(name != None):
+        filename = name
+    elif (driver != ''):
+        filename = f'{driver}_{circuit}.csv'
     else:
-        data_frame.to_csv(f'all_{circuit}.csv', index= False)
-    
+        filename = f'all_{circuit}.csv'
+
+    data_frame.to_csv(filname,index=False)
     return data_frame
     
