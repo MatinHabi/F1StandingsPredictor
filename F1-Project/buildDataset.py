@@ -17,7 +17,6 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
     if (event['F1ApiSupport'] == False):
         return pd.DataFrame()
     
-    f.get_session(year,circuit,session_type).get_circuit_info()
     session = f.get_session(year,circuit, session_type)
     session.load(telemetry=False,weather=True,messages=False)
     weather = session.weather_data
@@ -38,7 +37,7 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
         
     return driver_laps
 
-def build_dataset(driver='', circuit='Melbourne', session_type='R', years=range(2018, 2026), name=None):
+def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(2018, 2026), name=None):
     frames = []
     for y in years:
         frames.append(get_driver_laps(y,driver,circuit,session_type))
@@ -64,4 +63,3 @@ def build_dataset(driver='', circuit='Melbourne', session_type='R', years=range(
     os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
     data_frame.to_csv(filepath, index=False)
     return data_frame
-    
