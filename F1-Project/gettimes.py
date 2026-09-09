@@ -27,6 +27,9 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
     
     driver_laps['Year'] = year
     driver_laps['LapTime'] = driver_laps['LapTime'].dt.total_seconds()
+    res = session.results.set_index('Abbreviation')
+    driver_laps['StartingPosition'] = driver_laps['Driver'].map(res['GridPosition']) #mapping each driver with their starting position (which was decided before the race)
+        
     return driver_laps
 
 def build_dataset(driver='', circuit='Melbourne', session_type='R', years=range(2018, 2026)):
@@ -38,11 +41,7 @@ def build_dataset(driver='', circuit='Melbourne', session_type='R', years=range(
     data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound'])
     data_frame['Compound'] = data_frame['Compound'].replace('SUPERSOFT','SOFT')
     data_frame = add_stint(data_frame)
-
-    #ordering based on drivers
-    res = session.result.set_index('Abbreviation')
-    data_frame['StartingPosition'] = data_frame['Driver'].map(res['GridPosition']) #mapping each driver with their starting position (which was decided before the race)
-
+    
     if(driver != ''):
         data_frame.to_csv(f'{driver}_{circuit}.csv', index= False)
     else:
