@@ -41,7 +41,7 @@ def iqr(file):
 #<------------------------------ CORROLATION WITH LAP TIME ------------------------------------------>
 
 def corr_with_laptime(filename):
-    file = pd.read_csv(f'./all/{filename}')
+    file = pd.read_csv(f'{filename}')
     d = file.select_dtypes(include = ['number','bool'])
     c = d.corr()['LapTime'].drop('LapTime').sort_values() #pearson's r
 
@@ -52,13 +52,13 @@ def corr_with_laptime(filename):
     plt.ylabel('Features')
     plt.title('Finding Which Features Most Impact LapTime')
     plt.tight_layout() #.tight_layout ensures the graph is padded correctly to fit feature names into one line
-    #print(c)
-    #plt.show()
+    print(c)
+    plt.show()
     return c
 
 #<----------------------------------------- Tyre Degredation --------------------------------------->
 def tyre_deg(filename):
-    file = pd.read_csv(f'./all/{filename}')
+    file = pd.read_csv(f'{filename}')
     anomalous = file[['IsSC','IsVSC','IsInLap','IsOutLap','IsRestartLap']].any(axis=1)
     clean = file[file['IsAccurate'] & ~anomalous] #what does  & ~anomalous do?
     clean = clean[clean['Compound'].isin(['SOFT','MEDIUM','HARD'])]
@@ -71,5 +71,5 @@ def tyre_deg(filename):
     plt.ylabel('Lap time (s)')
     plt.title('Tyre degradation by compound — clean racing laps only')
     plt.tight_layout()
-    #plt.show()
-    return 
+    plt.show()
+    return clean 
