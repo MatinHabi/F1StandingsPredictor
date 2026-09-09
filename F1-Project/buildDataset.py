@@ -66,6 +66,12 @@ def add_features(df):
     #Raw Spread varies a lot beteween 2020 and 2022 which is likely due to the groud-effect aero reset REGULATION changes in 2022
     df['GroudEffectEra'] = df['Year'] >= 2022
 
+    #gonna shift the SC/VSC flags up one lap cuz the cars are all bunched up for approx. 1 lap after SC/VSC flag turns off
+    #Fastf1 wouldn't tell me that tho so yeah...
+    df['IsRestartLap'] = (df.groupby(['Year','Driver'])[['IsSC', 'IsVSC']].shift(1).any(axis=1).fillna(False))
+
+    
+
     return df
 
 def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(2018, 2026), name=None):
