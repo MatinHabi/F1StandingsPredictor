@@ -22,8 +22,8 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
             'TrackStatus', 'PitInTime', 'PitOutTime', 'IsAccurate',
             'TrackTemp', 'AirTemp', 'Humidity', 'Rainfall']].copy()
 
-    driver_laps['IsInLap'] = driver_laps['PitInTime'].notna()
-    driver_laps['IsOutLap'] = driver_laps['PitOutTime'].notna()
+    driver_laps['IsInLap'] = driver_laps['PitInTime'].notna() #this is accounting for the lap the driver peels off to go into the pits
+    driver_laps['IsOutLap'] = driver_laps['PitOutTime'].notna() #this is accounting for the likely much slower lap after the driver comes out of the pit lanee
 
     status = driver_laps['TrackStatus'].astype(str)
     # Flags for future reference: 1 clear, 2 yellow, 4 safety car, 5 red flag, 6 VSC deployed, 7 VSC ending
@@ -45,6 +45,7 @@ def add_features(df):
     df['LapTimeDelta'] = g['LapTime'].diff()
 
     # short-term history to sees a trends not snapshots
+    #lag{1} = t-1 lap (the lap just before), lag{2} = t-2 laps ago, lag{3} = t-3 laps ago
     for k in (1,2,3):
         df[f'LapTime_lag{k}'] = g['LapTime'].shift(k)
 
@@ -69,7 +70,7 @@ def add_features(df):
     #gonna shift the SC/VSC flags up one lap cuz the cars are all bunched up for approx. 1 lap after SC/VSC flag turns off
     #Fastf1 wouldn't tell me that tho so yeah...
     df['IsRestartLap'] = (df.groupby(['Year','Driver'])[['IsSC', 'IsVSC']].shift(1).any(axis=1).fillna(False))
-    
+
     return df
 
 def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(2018, 2026), name=None):

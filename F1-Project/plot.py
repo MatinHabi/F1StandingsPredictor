@@ -4,6 +4,14 @@ import pandas as pd
 import cleanData as cd
 import numpy
 
+FEATURES = ['Driver','Team','LapNumber','LapTime','Position','Stint','TyreLife',
+            'Compound','FreshTyre','TrackStatus','PitInTime','PitOutTime','IsAccurate',
+            'TrackTemp','AirTemp','Humidity','Rainfall','IsInLap','IsOutLap','IsSC','IsVSC','Year',
+            'StartingPosition','LapTimeDelta','LapTime_lag1','LapTime_lag2','LapTime_lag3','PaceVsMedian',
+            'FuelLoad','GroudEffectEra','IsRestartLap']
+
+COMPOUND_COLOURS = {'SOFT':'green', 'MEDIUM':'yellow', 'INTERMEDIATE': 'blue', 'HARD' : 'red'}
+
 # <--------------------------- SCATTER --------------------------->
 def scatter(file):
     plt.figure(num="Scatter")
@@ -30,33 +38,36 @@ def iqr(file):
     sns.scatterplot(data = file, x = 'LapNumber', y = 'LapTime', hue = 'Year', palette = 'viridis')
     plt.legend(title= 'Year', bbox_to_anchor=(1.05,1), loc='upper right')
 
+#<------------------------------ CORROLATION WITH LAP TIME ------------------------------------------>
 
-COMPOUND_ORDER   = ['SOFT', 'MEDIUM', 'INTERMEDIATE' , 'HARD']
-COMPOUND_COLOURS = {'SOFT': '#C81E1E','MEDIUM': '#E1A100','HARD': '#3B7DD8', 'INTERMEDIATE': '#2CA02C', 'WET': '#1F4E8C',}
-NUMERIC          = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp']
+def corr_with_laptime(filename):
+    file = pd.read_csv(f'./all/{filename}')
+    d = file.select_dtypes(include = ['number','bool'])
+    c = d.corr()['LapTime'].drop('LapTime').sort_values() #pearson's r
 
-def race_trace(filename):
-    plt.figure(num="new shit")
-    file = pd.read_csv(f'{filename}')
-
-    g = sns.relplot(data=file, x='LapNumber', y='LapTime',
-                    hue='Compound', hue_order=COMPOUND_ORDER, palette=COMPOUND_COLOURS,
-                    style='Compound', style_order=COMPOUND_ORDER,
-                    col='Year', col_wrap=4, height=2.5, aspect=1.15,
-                    s=28, alpha=0.9, edgecolor='white', linewidth=0.4)
-
-    for year, ax in g.axes_dict.items():
-        year_data = file[file['Year'] == year]
-        for _, stint in year_data.groupby('Stint'):
-            ax.plot(stint['LapNumber'], stint['LapTime'],
-                    color='0.55', linewidth=1, alpha=0.6, zorder=0)
-        for stop in year_data.groupby('Stint')['LapNumber'].min()[1:]:
-            ax.axvline(stop - 0.5, color='0.8', linestyle='--', linewidth=1, zorder=0)
-
-    g.set_titles("{col_name}")
-    g.set_axis_labels("Lap", "Lap time (s)")
-    g.figure.suptitle("Race trace by season - dashed lines are pit stops", y=1.02)
-    sns.move_legend(g, 'center right', title='Compound', frameon=False)
-
+    plt.figure(num = 'Feature Selection', figsize=(7,6))
+    sns.barplot(x=c.values,y=c.index,hue=c.index,legend=True,palette='RdBu_r')
+    plt.axvline(0,color='0.3', linewidth=0.8)#.axvline adds a grey line at x=0
+    plt.xlabel('Corrolation with LapTime')
+    plt.ylabel('Features')
+    plt.title('Finding Which Features Most Impact LapTime')
+    plt.tight_layout() #.tight_layout ensures the graph is padded correctly to fit feature names into one line
+    print(c)
     plt.show()
-    return g
+
+#<----------------------------------------- Tyre Degredation --------------------------------------->
+def tyre_deg(filename):
+    file = pd.read_csv(f'./all/{filename}')
+    anomalous = file[['IsSC','IsVSC','IsInLap','IsOutLap','IsRestartLap']].any(axis=1)
+    clean = file[file['IsAccurate'] & ~anomalous] #what does  & ~anomalous do?
+    clean = clean[clean['Compound'].isin(['SOFT','MEDIUM','HARD'])]
+
+    plt.figure(num='Degradation', figsize=(7, 5))
+    sns.lineplot(data=clean, x='TyreLife', y='LapTime',
+                 hue='Compound', hue_order=['SOFT','MEDIUM','INTERMEDIATE','HARD'],
+                 palette=COMPOUND_COLOURS, errorbar=('ci', 95))
+    plt.xlabel('Laps on this tyre set')
+    plt.ylabel('Lap time (s)')
+    plt.title('Tyre degradation by compound — clean racing laps only')
+    plt.tight_layout()
+    plt.show()
