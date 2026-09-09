@@ -24,6 +24,10 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
 
     driver_laps['IsInLap'] = driver_laps['PitInTime'].notna()
     driver_laps['IsOutLap'] = driver_laps['PitOutTime'].notna()
+
+    status = driver_laps['TrackStatus'].astype(str)
+    driver_laps['IsSC'] = status.str.contains('4', regex=False) # safety car
+    driver_laps['IsVSC'] = status.str.contains('5',regex=False) #Virtual Safetty car
     
     driver_laps['Year'] = year
     driver_laps['LapTime'] = driver_laps['LapTime'].dt.total_seconds()
