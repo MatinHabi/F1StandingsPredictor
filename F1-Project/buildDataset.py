@@ -4,14 +4,6 @@ import os
 
 f.Cache.enable_cache("fastf1_cache")
 
-def add_stint(file):
-    #file = pd.read_csv(f'{filename}')
-    file = file.sort_values(['Year', 'LapNumber']).copy()
-    new_stint = file.groupby('Year')['TyreLife'].diff() <= 0 #pinging T when a new stint starts
-    file['Stint'] = new_stint.groupby(file['Year']).cumsum().astype(int) + 1
-    #file.to_csv('stint.csv')
-    return file
-
 def get_driver_laps(year, driver, circuit, session_type='R'):
     event = f.get_event(year,circuit)
     if (event['F1ApiSupport'] == False):
@@ -21,7 +13,7 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
     session.load(telemetry=False,weather=True,messages=False)
     weather = session.weather_data
 
-    driver_session = session.laps.pick_driver(driver) if(driver != '') else  session.laps
+    driver_session = session.laps.pick_driver(driver) if(driver != '') else session.laps
 
     data = pd.merge_asof(driver_session.sort_values('Time'), weather.sort_values('Time'), on='Time')
 
@@ -29,6 +21,9 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
             'Stint', 'TyreLife', 'Compound', 'FreshTyre',
             'TrackStatus', 'PitInTime', 'PitOutTime', 'IsAccurate',
             'TrackTemp', 'AirTemp', 'Humidity', 'Rainfall']].copy()
+
+    driver_laps['IsInLap'] = driver_laps['PitInTime'].notna()
+    driver_laps['IsOutLap'] = driver_laps['PitOutTime'].notna()
     
     driver_laps['Year'] = year
     driver_laps['LapTime'] = driver_laps['LapTime'].dt.total_seconds()
@@ -52,7 +47,6 @@ def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(
     data_frame = pd.concat(frames, ignore_index=True)
     data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound'])
     data_frame['Compound'] = data_frame['Compound'].replace('SUPERSOFT','SOFT')
-    data_frame = add_stint(data_frame)
     
     if name is not None:
         filepath = name
