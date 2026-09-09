@@ -23,11 +23,14 @@ def get_driver_laps(year, driver, circuit, session_type='R'):
         return pd.DataFrame()
 
     if laps.empty:
+        with open('SKIPPED.txt', 'a') as textfile:
+            print(f'skipping {year} {circuit} : session.laps_empty', file = textfile)
         return pd.DataFrame()
     
     weather = session.weather_data
 
     driver_session = laps.pick_driver(driver) if(driver != '') else laps
+    driver_session = driver_session[driver_session['Time'].notna()]
 
     data = pd.merge_asof(driver_session.sort_values('Time'), weather.sort_values('Time'), on='Time')
 
@@ -102,6 +105,7 @@ def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(
     if not frames:
         with open('SKIPPED.txt', 'a') as textfile:
             print(f'skipping {circuit} : no years availible', file = textfile)
+        return pd.DataFrame()
 
     data_frame = pd.concat(frames, ignore_index=True)
     data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound'])
