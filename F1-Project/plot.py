@@ -52,8 +52,9 @@ def corr_with_laptime(filename):
     plt.ylabel('Features')
     plt.title('Finding Which Features Most Impact LapTime')
     plt.tight_layout() #.tight_layout ensures the graph is padded correctly to fit feature names into one line
-    print(c)
-    plt.show()
+    #print(c)
+    #plt.show()
+    return c
 
 #<----------------------------------------- Tyre Degredation --------------------------------------->
 def tyre_deg(filename):
@@ -70,4 +71,5 @@ def tyre_deg(filename):
     plt.ylabel('Lap time (s)')
     plt.title('Tyre degradation by compound — clean racing laps only')
     plt.tight_layout()
-    plt.show()
+    #plt.show()
+    return 

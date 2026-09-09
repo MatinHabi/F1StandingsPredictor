@@ -6,14 +6,28 @@ f.Cache.enable_cache("fastf1_cache")
 
 def get_driver_laps(year, driver, circuit, session_type='R'):
     event = f.get_event(year,circuit)
+
     if (event['F1ApiSupport'] == False):
+        with open('SKIPPED.txt', 'a') as textfile:
+            print(f'skipping {year} {circuit} : no_api_support', file = textfile)
+        return pd.DataFrame()
+
+    session = f.get_session(year,circuit, session_type)
+
+    try:
+        session.load(telemetry=False,weather=True,messages=False)
+        laps = session.laps
+    except Exception as e:
+        with open('SKIPPED.txt', 'a') as textfile:
+            print(f'skipping {year} {circuit} : {e}', file = textfile)
+        return pd.DataFrame()
+
+    if laps.empty:
         return pd.DataFrame()
     
-    session = f.get_session(year,circuit, session_type)
-    session.load(telemetry=False,weather=True,messages=False)
     weather = session.weather_data
 
-    driver_session = session.laps.pick_driver(driver) if(driver != '') else session.laps
+    driver_session = laps.pick_driver(driver) if(driver != '') else laps
 
     data = pd.merge_asof(driver_session.sort_values('Time'), weather.sort_values('Time'), on='Time')
 
@@ -84,6 +98,10 @@ def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(
             non_empty.append(df)
 
     frames = non_empty
+
+    if not frames:
+        with open('SKIPPED.txt', 'a') as textfile:
+            print(f'skipping {circuit} : no years availible', file = textfile)
 
     data_frame = pd.concat(frames, ignore_index=True)
     data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound'])
