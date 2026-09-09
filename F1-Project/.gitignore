@@ -12,6 +12,8 @@ cache/
 VER_cache/
 fastf1_cache/
 *.sqlite
+all/
+*.csv
 
 # Editor / OS
 .vscode/
