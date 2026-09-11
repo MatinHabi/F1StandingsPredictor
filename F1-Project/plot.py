@@ -11,6 +11,10 @@ FEATURES = ['Driver','Team','LapNumber','LapTime','Position','Stint','TyreLife',
             'StartingPosition','LapTimeDelta','LapTime_lag1','LapTime_lag2','LapTime_lag3','PaceVsMedian',
             'FuelLoad','GroudEffectEra','IsRestartLap']
 
+MODEL = ['LapTime','TyreLife','LapNumber','FuelLoad','Stint','Compound','FreshTyre',
+            'TrackTemp','AirTemp','Humidity','StartingPosition',
+            'LapTime_lag1','LapTime_lag2','LapTime_lag3']
+
 COMPOUND_COLOURS = {'SOFT':'red', 'MEDIUM':'yellow', 'INTERMEDIATE': 'blue', 'WET': 'blue','HARD' : 'grey'}
 
 # <--------------------------- SCATTER --------------------------->
@@ -43,11 +47,11 @@ def iqr(file):
 
 def corr_with_laptime(filename = 'all_Spanish Grand Prix', show=False, path = 'all'):
     file = pd.read_csv(os.path.join(path,filename) + '.csv')
-    d = file[FEATURES].select_dtypes(include = ['number','bool'])
-    c = d.corr()['LapTime'].drop('LapTime').sort_values() #pearson's r
+    d = file[MODEL].select_dtypes(include = ['number','bool'])
+    c = d.corr()['LapTime'].drop('LapTime').dropna().sort_values() #pearson's r
 
     plt.figure(num = 'Feature Selection', figsize=(9,9))
-    sns.barplot(x=c.values,y=c.index,hue=c.index,legend=True,palette='RdBu_r')
+    sns.barplot(x=c.values,y=c.index,hue=c.index,legend=False,palette='RdBu_r')
     plt.axvline(0,color='0.3', linewidth=0.8)#.axvline adds a grey line at x=0
     plt.xlabel('Corrolation with LapTime')
     plt.ylabel('Features')

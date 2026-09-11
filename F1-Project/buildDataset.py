@@ -67,7 +67,7 @@ def add_features(df):
     for k in (1,2,3):
         df[f'LapTime_lag{k}'] = g['LapTime'].shift(k)
 
-    # field-relative pace: how well is th driver doing on lap x compared to everyone else?
+    # field-relative pace: how well is th driver doing on lap x compared to everyone else?  
     field_median = df.groupby(['Year','LapNumber'])['LapTime'].transform('median')
     df['PaceVsMedian'] = df['LapTime'] - field_median
 
