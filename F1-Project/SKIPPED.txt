@@ -101,3 +101,109 @@ skipping 2023 Las Vegas Grand Prix : any API: 500 calls/h
 skipping 2024 Las Vegas Grand Prix : any API: 500 calls/h
 skipping 2025 Las Vegas Grand Prix : any API: 500 calls/h
 skipping Las Vegas Grand Prix : no years availible
+skipping 2018 Italian Grand Prix : The data you are trying to access has not been loaded yet. See `Session.load`
+skipping 2018 Mexican Grand Prix : any API: 500 calls/h
+skipping 2019 Mexican Grand Prix : any API: 500 calls/h
+skipping Mexican Grand Prix : no years availible
+skipping 2018 Brazilian Grand Prix : any API: 500 calls/h
+skipping 2019 Brazilian Grand Prix : any API: 500 calls/h
+skipping Brazilian Grand Prix : no years availible
+skipping 2019 Abu Dhabi Grand Prix : any API: 500 calls/h
+skipping 2020 Abu Dhabi Grand Prix : any API: 500 calls/h
+skipping 2021 Abu Dhabi Grand Prix : any API: 500 calls/h
+skipping 2022 Abu Dhabi Grand Prix : any API: 500 calls/h
+skipping 2023 Abu Dhabi Grand Prix : any API: 500 calls/h
+skipping 2024 Abu Dhabi Grand Prix : any API: 500 calls/h
+skipping 2025 Abu Dhabi Grand Prix : any API: 500 calls/h
+skipping 2020 Styrian Grand Prix : any API: 500 calls/h
+skipping 2021 Styrian Grand Prix : any API: 500 calls/h
+skipping Styrian Grand Prix : no years availible
+skipping 2020 Eifel Grand Prix : any API: 500 calls/h
+skipping Eifel Grand Prix : no years availible
+skipping 2020 Portuguese Grand Prix : any API: 500 calls/h
+skipping 2021 Portuguese Grand Prix : any API: 500 calls/h
+skipping Portuguese Grand Prix : no years availible
+skipping 2020 Emilia Romagna Grand Prix : any API: 500 calls/h
+skipping 2021 Emilia Romagna Grand Prix : any API: 500 calls/h
+skipping 2022 Emilia Romagna Grand Prix : any API: 500 calls/h
+skipping 2024 Emilia Romagna Grand Prix : any API: 500 calls/h
+skipping 2025 Emilia Romagna Grand Prix : any API: 500 calls/h
+skipping Emilia Romagna Grand Prix : no years availible
+skipping 2020 Turkish Grand Prix : any API: 500 calls/h
+skipping 2021 Turkish Grand Prix : any API: 500 calls/h
+skipping Turkish Grand Prix : no years availible
+skipping 2020 Sakhir Grand Prix : any API: 500 calls/h
+skipping Sakhir Grand Prix : no years availible
+skipping 2021 Dutch Grand Prix : any API: 500 calls/h
+skipping 2022 Dutch Grand Prix : any API: 500 calls/h
+skipping 2023 Dutch Grand Prix : any API: 500 calls/h
+skipping 2024 Dutch Grand Prix : any API: 500 calls/h
+skipping 2025 Dutch Grand Prix : any API: 500 calls/h
+skipping Dutch Grand Prix : no years availible
+skipping 2021 Mexico City Grand Prix : any API: 500 calls/h
+skipping 2022 Mexico City Grand Prix : any API: 500 calls/h
+skipping 2023 Mexico City Grand Prix : any API: 500 calls/h
+skipping 2024 Mexico City Grand Prix : any API: 500 calls/h
+skipping 2025 Mexico City Grand Prix : any API: 500 calls/h
+skipping Mexico City Grand Prix : no years availible
+skipping 2021 São Paulo Grand Prix : any API: 500 calls/h
+skipping 2022 São Paulo Grand Prix : any API: 500 calls/h
+skipping 2023 São Paulo Grand Prix : any API: 500 calls/h
+skipping 2024 São Paulo Grand Prix : any API: 500 calls/h
+skipping 2025 São Paulo Grand Prix : any API: 500 calls/h
+skipping São Paulo Grand Prix : no years availible
+skipping 2021 Qatar Grand Prix : any API: 500 calls/h
+skipping 2023 Qatar Grand Prix : any API: 500 calls/h
+skipping 2024 Qatar Grand Prix : any API: 500 calls/h
+skipping 2025 Qatar Grand Prix : any API: 500 calls/h
+skipping Qatar Grand Prix : no years availible
+skipping 2021 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping 2022 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping 2023 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping 2024 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping 2025 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping Saudi Arabian Grand Prix : no years availible
+skipping 2022 Miami Grand Prix : any API: 500 calls/h
+skipping 2023 Miami Grand Prix : any API: 500 calls/h
+skipping 2024 Miami Grand Prix : any API: 500 calls/h
+skipping 2025 Miami Grand Prix : any API: 500 calls/h
+skipping Miami Grand Prix : no years availible
+skipping 2023 Las Vegas Grand Prix : any API: 500 calls/h
+skipping 2024 Las Vegas Grand Prix : any API: 500 calls/h
+skipping 2025 Las Vegas Grand Prix : any API: 500 calls/h
+skipping Las Vegas Grand Prix : no years availible
+skipping 2018 Italian Grand Prix : The data you are trying to access has not been loaded yet. See `Session.load`
+skipping 2024 Dutch Grand Prix : any API: 500 calls/h
+skipping 2025 Dutch Grand Prix : any API: 500 calls/h
+skipping 2021 Mexico City Grand Prix : any API: 500 calls/h
+skipping 2022 Mexico City Grand Prix : any API: 500 calls/h
+skipping 2023 Mexico City Grand Prix : any API: 500 calls/h
+skipping 2024 Mexico City Grand Prix : any API: 500 calls/h
+skipping 2025 Mexico City Grand Prix : any API: 500 calls/h
+skipping Mexico City Grand Prix : no years availible
+skipping 2021 São Paulo Grand Prix : any API: 500 calls/h
+skipping 2022 São Paulo Grand Prix : any API: 500 calls/h
+skipping 2023 São Paulo Grand Prix : any API: 500 calls/h
+skipping 2024 São Paulo Grand Prix : any API: 500 calls/h
+skipping 2025 São Paulo Grand Prix : any API: 500 calls/h
+skipping São Paulo Grand Prix : no years availible
+skipping 2021 Qatar Grand Prix : any API: 500 calls/h
+skipping 2023 Qatar Grand Prix : any API: 500 calls/h
+skipping 2024 Qatar Grand Prix : any API: 500 calls/h
+skipping 2025 Qatar Grand Prix : any API: 500 calls/h
+skipping Qatar Grand Prix : no years availible
+skipping 2021 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping 2022 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping 2023 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping 2024 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping 2025 Saudi Arabian Grand Prix : any API: 500 calls/h
+skipping Saudi Arabian Grand Prix : no years availible
+skipping 2022 Miami Grand Prix : any API: 500 calls/h
+skipping 2023 Miami Grand Prix : any API: 500 calls/h
+skipping 2024 Miami Grand Prix : any API: 500 calls/h
+skipping 2025 Miami Grand Prix : any API: 500 calls/h
+skipping Miami Grand Prix : no years availible
+skipping 2023 Las Vegas Grand Prix : any API: 500 calls/h
+skipping 2024 Las Vegas Grand Prix : any API: 500 calls/h
+skipping 2025 Las Vegas Grand Prix : any API: 500 calls/h
+skipping Las Vegas Grand Prix : no years availible

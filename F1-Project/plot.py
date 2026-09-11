@@ -11,7 +11,7 @@ FEATURES = ['Driver','Team','LapNumber','LapTime','Position','Stint','TyreLife',
             'StartingPosition','LapTimeDelta','LapTime_lag1','LapTime_lag2','LapTime_lag3','PaceVsMedian',
             'FuelLoad','GroudEffectEra','IsRestartLap']
 
-COMPOUND_COLOURS = {'SOFT':'green', 'MEDIUM':'yellow', 'INTERMEDIATE': 'blue', 'HARD' : 'red'}
+COMPOUND_COLOURS = {'SOFT':'red', 'MEDIUM':'yellow', 'INTERMEDIATE': 'blue', 'WET': 'blue','HARD' : 'grey'}
 
 # <--------------------------- SCATTER --------------------------->
 def scatter(file):
@@ -43,7 +43,7 @@ def iqr(file):
 
 def corr_with_laptime(filename = 'all_Spanish Grand Prix', show=False, path = 'all'):
     file = pd.read_csv(os.path.join(path,filename) + '.csv')
-    d = file.select_dtypes(include = ['number','bool'])
+    d = file[FEATURES].select_dtypes(include = ['number','bool'])
     c = d.corr()['LapTime'].drop('LapTime').sort_values() #pearson's r
 
     plt.figure(num = 'Feature Selection', figsize=(9,9))
