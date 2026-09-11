@@ -62,17 +62,18 @@ def corr_with_laptime(filename = 'all_Spanish Grand Prix', show=False, path = 'a
     return c
 
 #<----------------------------------------- Tyre Degredation --------------------------------------->
-def tyre_deg(filename,show=False):
-    file = pd.read_csv(f'{filename}')
+#This is kinda terrible data - all over the place
+def tyre_deg(filename,show=False, path='all'):
+    file = pd.read_csv(os.path.join(path,filename) + '.csv')
     anomalous = file[['IsSC','IsVSC','IsInLap','IsOutLap','IsRestartLap']].any(axis=1)
-    clean = file[file['IsAccurate'] & ~anomalous] #what does  & ~anomalous do?
+    clean = file[file['IsAccurate'] & ~anomalous] #make sure we're not adding laps laps that are affected by outside features like pit stops & safety cars
     clean = clean[clean['Compound'].isin(['SOFT','MEDIUM','HARD'])]
 
-    plt.figure(num='Degradation', figsize=(7, 5))
+    plt.figure(num='Degradation', figsize=(9, 9))
     sns.lineplot(data=clean, x='TyreLife', y='LapTime',
-                 hue='Compound', hue_order=['SOFT','MEDIUM','INTERMEDIATE','HARD'],
+                 hue= file['Compound'], hue_order=['SOFT','MEDIUM','INTERMEDIATE','WET','HARD'],
                  palette=COMPOUND_COLOURS, errorbar=('ci', 95))
-    plt.xlabel('Laps on this tyre set')
+    plt.xlabel(f'Laps on this tyre set - {filename[4:]}')
     plt.ylabel('Lap time (s)')
            
     plt.title('Tyre degradation by compound — clean racing laps only')
