@@ -67,7 +67,7 @@ def tyre_deg(filename,show=False, path='all'):
     file = pd.read_csv(os.path.join(path,filename) + '.csv')
     anomalous = file[['IsSC','IsVSC','IsInLap','IsOutLap','IsRestartLap']].any(axis=1)
     clean = file[file['IsAccurate'] & ~anomalous] #make sure we're not adding laps laps that are affected by outside features like pit stops & safety cars
-    clean = clean[clean['Compound'].isin(['SOFT','MEDIUM','HARD'])]
+    clean = clean[clean['Compound'].isin(['SOFT','MEDIUM','INTERMEDIATE','WET','HARD'])]
 
     plt.figure(num='Degradation', figsize=(9, 9))
     sns.lineplot(data=clean, x='TyreLife', y='LapTime',
