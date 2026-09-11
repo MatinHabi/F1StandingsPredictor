@@ -3,6 +3,7 @@ import seaborn as sns
 import pandas as pd
 import cleanData as cd
 import numpy
+import os
 
 FEATURES = ['Driver','Team','LapNumber','LapTime','Position','Stint','TyreLife',
             'Compound','FreshTyre','TrackStatus','PitInTime','PitOutTime','IsAccurate',
@@ -40,24 +41,24 @@ def iqr(file):
 
 #<------------------------------ CORROLATION WITH LAP TIME ------------------------------------------>
 
-def corr_with_laptime(filename):
-    file = pd.read_csv(f'{filename}')
+def corr_with_laptime(filename = 'all_Spanish Grand Prix', show=False, path = 'all'):
+    file = pd.read_csv(os.path.join(path,filename) + '.csv')
     d = file.select_dtypes(include = ['number','bool'])
     c = d.corr()['LapTime'].drop('LapTime').sort_values() #pearson's r
 
-    plt.figure(num = 'Feature Selection', figsize=(7,6))
+    plt.figure(num = 'Feature Selection', figsize=(9,9))
     sns.barplot(x=c.values,y=c.index,hue=c.index,legend=True,palette='RdBu_r')
     plt.axvline(0,color='0.3', linewidth=0.8)#.axvline adds a grey line at x=0
     plt.xlabel('Corrolation with LapTime')
     plt.ylabel('Features')
-    plt.title('Finding Which Features Most Impact LapTime')
+    plt.title(f'Finding Which Features Most Impact LapTime - {filename[4:]}')
     plt.tight_layout() #.tight_layout ensures the graph is padded correctly to fit feature names into one line
     print(c)
-    plt.show()
+    if show : plt.show()
     return c
 
 #<----------------------------------------- Tyre Degredation --------------------------------------->
-def tyre_deg(filename):
+def tyre_deg(filename,show=False):
     file = pd.read_csv(f'{filename}')
     anomalous = file[['IsSC','IsVSC','IsInLap','IsOutLap','IsRestartLap']].any(axis=1)
     clean = file[file['IsAccurate'] & ~anomalous] #what does  & ~anomalous do?
@@ -69,7 +70,8 @@ def tyre_deg(filename):
                  palette=COMPOUND_COLOURS, errorbar=('ci', 95))
     plt.xlabel('Laps on this tyre set')
     plt.ylabel('Lap time (s)')
+           
     plt.title('Tyre degradation by compound — clean racing laps only')
     plt.tight_layout()
-    plt.show()
+    if show : plt.show()
     return clean 
