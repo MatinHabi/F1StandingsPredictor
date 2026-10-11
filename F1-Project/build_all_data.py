@@ -1,6 +1,9 @@
 import buildDataset as bd
 import pandas as pd
 import fastf1 as f1
+import os
+import time
+
 
 f1.Cache.enable_cache('fastf1_cache')
 
@@ -14,4 +17,15 @@ for year in range(2018, 2026):
         events_by_name[name].append(year)
 
 for name in events_by_name:
-    bd.build_dataset(name, years=events_by_name[name])
+    if os.path.exists(f'all/all_{name}.csv'):
+        continue
+    while True:
+        try:
+            bd.build_dataset(name, years=events_by_name[name])
+            break
+        except Exception as e:
+            if '500 calls/h' in str(e):
+                print('rate limited, sleeping 1h...')
+                time.sleep(3600)
+            else:
+                raise

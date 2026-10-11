@@ -59,7 +59,7 @@ def add_features(df):
     df = df.sort_values(['Year','Driver','LapNumber']).copy()
     g = df.groupby(['Year','Driver'])
 
-    # what the model is actually predicting which is changes in lap time
+    # trends the laptime
     df['LapTimeDelta'] = g['LapTime'].diff()
 
     # short-term history to sees a trends not snapshots
@@ -71,15 +71,24 @@ def add_features(df):
     field_median = df.groupby(['Year','LapNumber'])['LapTime'].transform('median')
     df['PaceVsMedian'] = df['LapTime'] - field_median
 
+    #cleaned PaceVsMedian AI ASSISTED
+    clean = ~(df['IsInLap'] | df['IsOutLap'] | df['IsSC'] | df['IsVSC']) #only grab clean laps
+    yearly = (df[clean]
+            .groupby(['Driver','Circuit','Year'])['PaceVsMedian'].mean()
+            .reset_index()
+            .sort_values('Year'))
+    yearly['HistPaceVsMedian'] = (yearly.groupby(['Driver','Circuit'])['PaceVsMedian']
+                                    .transform(lambda s: s.shift(1).expanding().mean()))
+    df = df.merge(yearly[['Driver','Circuit','Year','HistPaceVsMedian']],
+                    on=['Driver','Circuit','Year'], how='left')
+    # END OF AI ASSISTANCE
+    
     # fuel load 1.0 at lights-out, 0.0 at the flag
-    total_laps = df.groupby('Year')['LapNumber'].transform('max')
-    df['FuelLoad'] = (total_laps - df['LapNumber']) / total_laps
+    total_laps = df.groupby('Year')['LapNumber'].transform('max') 
+    df['FuelLoad'] = (total_laps - df['LapNumber']) / total_laps #if there's 50 laps in a race: (50 - 20)/50 = 3/5 of fuel left
 
-    #ALSO MAYBE BUILD: GapToAhead -> but it needs Time or LapTimeStart to get cummilative race time 
-    #idea: tyrelife * compound???
-
-    #FastF1 puts ppl in the pit at the strt of the race as pos 0 -> which is better than pole my data thinks
-    #FIXING IT
+   
+    #FIXING pit starts
     df['StartingPosition'] = df['StartingPosition'].replace(0,20)
 
     #Raw Spread varies a lot beteween 2020 and 2022 which is likely due to the groud-effect aero reset REGULATION changes in 2022
@@ -109,9 +118,10 @@ def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(
         return pd.DataFrame()
 
     data_frame = pd.concat(frames, ignore_index=True)
-    data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound'])
+    data_frame = data_frame.dropna(subset = ['LapNumber', 'LapTime', 'TyreLife', 'TrackTemp', 'Compound', 'LapTimeDelta', 'LapTime_lag1', 'LapTime_lag2', 'LapTime_lag3'])
     data_frame['Compound'] = data_frame['Compound'].replace(['ULTRASOFT','HYPERSOFT','SUPERSOFT'],'SOFT')
     data_frame = add_features(data_frame)
+
     
     if name is not None:
         filepath = name
