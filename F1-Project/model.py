@@ -25,5 +25,5 @@ class MLP(nn.Module):
         return x
 
 d = pd.read_csv("all2/all2_Australian Grand Prix.csv")
-X = d[]
-Y = d["Y"]
+X = d.iloc[:,:-1] 
+Y =d.iloc[:,-1]
