@@ -471,3 +471,66 @@ skipping 2023 Las Vegas Grand Prix : any API: 500 calls/h
 skipping 2024 Las Vegas Grand Prix : any API: 500 calls/h
 skipping 2025 Las Vegas Grand Prix : any API: 500 calls/h
 skipping Las Vegas Grand Prix : no years availible
+skipping 2018 Italian Grand Prix : no lap data
+skipping 2018 Italian Grand Prix : no lap data
+skipping 2018 Australian Grand Prix : wet race
+skipping 2025 Australian Grand Prix : wet race
+skipping 2018 Chinese Grand Prix : wet race
+skipping 2018 Spanish Grand Prix : wet race
+skipping 2018 Australian Grand Prix : wet race
+skipping 2025 Australian Grand Prix : wet race
+skipping 2018 Chinese Grand Prix : wet race
+skipping 2018 Spanish Grand Prix : wet race
+skipping 2024 Spanish Grand Prix : wet race
+skipping 2018 Monaco Grand Prix : wet race
+skipping 2019 Monaco Grand Prix : wet race
+skipping 2022 Monaco Grand Prix : wet race
+skipping 2023 Monaco Grand Prix : wet race
+skipping 2024 Canadian Grand Prix : wet race
+skipping 2025 Canadian Grand Prix : wet race
+skipping 2018 Australian Grand Prix : wet race
+skipping 2025 Australian Grand Prix : wet race
+skipping 2018 Chinese Grand Prix : wet race
+skipping 2018 Spanish Grand Prix : wet race
+skipping 2024 Spanish Grand Prix : wet race
+skipping 2018 Monaco Grand Prix : wet race
+skipping 2019 Monaco Grand Prix : wet race
+skipping 2022 Monaco Grand Prix : wet race
+skipping 2023 Monaco Grand Prix : wet race
+skipping 2024 Canadian Grand Prix : wet race
+skipping 2025 Canadian Grand Prix : wet race
+skipping 2018 French Grand Prix : wet race
+skipping 2018 Australian Grand Prix : wet race
+skipping 2025 Australian Grand Prix : wet race
+skipping 2018 Chinese Grand Prix : wet race
+skipping 2018 Spanish Grand Prix : wet race
+skipping 2024 Spanish Grand Prix : wet race
+skipping 2018 Monaco Grand Prix : wet race
+skipping 2019 Monaco Grand Prix : wet race
+skipping 2022 Monaco Grand Prix : wet race
+skipping 2023 Monaco Grand Prix : wet race
+skipping 2024 Canadian Grand Prix : wet race
+skipping 2025 Canadian Grand Prix : wet race
+skipping 2018 French Grand Prix : wet race
+skipping 2021 Austrian Grand Prix : wet race
+skipping 2023 Austrian Grand Prix : wet race
+skipping 2024 Austrian Grand Prix : wet race
+skipping 2022 British Grand Prix : wet race
+skipping 2024 British Grand Prix : wet race
+skipping 2025 British Grand Prix : wet race
+skipping 2018 German Grand Prix : wet race
+skipping 2019 German Grand Prix : wet race
+skipping  German Grand Prix : no years availible
+skipping 2020 Hungarian Grand Prix : wet race
+skipping 2021 Hungarian Grand Prix : wet race
+skipping 2022 Hungarian Grand Prix : wet race
+skipping 2021 Belgian Grand Prix : wet race
+skipping 2023 Belgian Grand Prix : wet race
+skipping 2025 Belgian Grand Prix : wet race
+skipping 2018 Italian Grand Prix : no lap data
+skipping 2022 Singapore Grand Prix : wet race
+skipping 2025 Singapore Grand Prix : wet race
+skipping 2018 Russian Grand Prix : wet race
+skipping 2019 Russian Grand Prix : wet race
+skipping 2021 Russian Grand Prix : wet race
+skipping 2022 Japanese Grand Prix : wet race

@@ -1,4 +1,4 @@
-import buildDataset as bd
+import buildDataset2 as bd
 import pandas as pd
 import fastf1 as f1
 import os
@@ -17,7 +17,7 @@ for year in range(2018, 2026):
         events_by_name[name].append(year)
 
 for name in events_by_name:
-    if os.path.exists(f'all/all_{name}.csv'):
+    if os.path.exists(f'all2/all_{name}.csv'):
         continue
     while True:
         try:
