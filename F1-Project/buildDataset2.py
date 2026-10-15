@@ -78,7 +78,9 @@ def basic_structure(circuit, session_type='R', year=2024):
     df['Year'] = year
     df['Race'] = f"{session.event['EventName']}"
 
-    return df.drop(columns='Team').sort_values(['Driver', 'LapNumber'])
+    # target last
+    df = df.drop(columns='Team').sort_values(['Driver', 'LapNumber'])
+    return df[[c for c in df.columns if c != 'LapTime'] + ['LapTime']]
 
 
 def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(2018, 2027), name=None):
@@ -109,3 +111,5 @@ def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(
     os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
     data_frame.to_csv(filepath, index=False)
     return data_frame
+
+

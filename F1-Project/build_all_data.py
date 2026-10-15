@@ -17,7 +17,7 @@ for year in range(2018, 2026):
         events_by_name[name].append(year)
 
 for name in events_by_name:
-    if os.path.exists(f'all2/all_{name}.csv'):
+    if os.path.exists(f'all2/all2_{name}.csv'):
         continue
     while True:
         try:

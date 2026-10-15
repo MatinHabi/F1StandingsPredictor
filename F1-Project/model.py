@@ -3,8 +3,6 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 import numpy as np
 import pandas as pd
-import glob
-import os
 
 
 class MLP(nn.Module):
@@ -26,4 +24,6 @@ class MLP(nn.Module):
         x = self.output(x)
         return x
 
-X = 
+d = pd.read_csv("all2/all2_Australian Grand Prix.csv")
+X = d[]
+Y = d["Y"]
