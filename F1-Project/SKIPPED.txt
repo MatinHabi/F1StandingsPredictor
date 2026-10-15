@@ -594,3 +594,8 @@ skipping 2024 São Paulo Grand Prix : wet race
 skipping 2021 Qatar Grand Prix : wet race
 skipping 2022 Miami Grand Prix : wet race
 skipping 2025 Miami Grand Prix : wet race
+skipping 2018 German Grand Prix : wet race
+skipping 2019 German Grand Prix : wet race
+skipping  German Grand Prix : no years availible
+skipping 2020 Eifel Grand Prix : wet race
+skipping  Eifel Grand Prix : no years availible

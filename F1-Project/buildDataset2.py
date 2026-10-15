@@ -11,12 +11,6 @@ LOCATION_ALIASES = {'Yas Island': 'Yas Marina', 'Marina Bay': 'Singapore'}
 # first year of a layout change big enough to shift lap times
 LAYOUT_CHANGES = {'Melbourne': 2022, 'Yas Marina': 2021, 'Barcelona': 2023, 'Singapore': 2023}
 
-
-def skip(year, circuit, reason):
-    with open('SKIPPED.txt', 'a') as textfile:
-        print(f'skipping {year} {circuit} : {reason}', file=textfile)
-
-
 def track_key(session, year):
     # key by venue + layout, not event name (Styrian = Austrian, Mexican = Mexico City, ...)
     if session.event['EventName'] == 'Sakhir Grand Prix':
@@ -36,12 +30,6 @@ def basic_structure(circuit, session_type='R', year=2024):
     try:
         laps = pd.DataFrame(session.laps)
     except DataNotLoadedError:
-        skip(year, circuit, 'no lap data')
-        return pd.DataFrame()
-
-    # wet races are out of scope
-    if session.weather_data['Rainfall'].any():
-        skip(year, circuit, 'wet race')
         return pd.DataFrame()
 
     laps = laps.sort_values(['Driver', 'LapNumber'])
@@ -53,20 +41,19 @@ def basic_structure(circuit, session_type='R', year=2024):
 
     # track temp at the time each lap ended
     weather = session.weather_data[['Time', 'TrackTemp']].sort_values('Time')
-    laps = pd.merge_asof(laps.dropna(subset=['Time']).sort_values('Time'), weather,
-                         on='Time', direction='backward')
+    laps = pd.merge_asof(laps.dropna(subset=['Time']).sort_values('Time'), weather, on='Time', direction='backward')
 
     # filters, not features: keep clean green-flag laps only
-    green = (
-        (laps['TrackStatus'] == '1')
-        & (laps['PrevTrackStatus'] == '1')
-        & (laps['IsAccurate'] == True)
-        & laps['PitInTime'].isna()       # in-lap
-        & laps['PitOutTime'].isna()      # out-lap
-        & laps['Compound']
-    )
-
-    df = laps.loc[green, ['Driver', 'Team', 'LapNumber', 'Compound', 'TyreLife', 'TrackTemp', 'LapTime']].copy()
+    # green = (
+    #     laps['TrackStatus']
+    #     & laps['PrevTrackStatus']
+    #     & (laps['IsAccurate'] == True)
+    #     & laps['PitInTime'].isna()       # in-lap
+    #     & laps['PitOutTime'].isna()      # out-lap
+    #     & laps['Compound'].notna()
+    # )
+    #df = laps.loc[green, ['Driver', 'Team', 'LapNumber', 'Compound', 'TyreLife', 'TrackTemp', 'LapTime']].copy()
+    df = laps.loc[:,['Driver', 'Team', 'LapNumber', 'Compound', 'TyreLife', 'TrackTemp', 'LapTime']]
     df['LapTime'] = df['LapTime'].dt.total_seconds()
 
     # fuel load 1.0 at lights-out, 0.0 at the flag

@@ -6,14 +6,15 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 
 ## TO DO:
+# ITS NOT AUTOREGRESSIVE YET. it needs the previous lap as an input feature (first lap prev laptime = 0.0)
+    # add lag laps
 # embeddings is lowkey broken - figure out how input data flows and make it so each driver has their own embedding + A DEFAULT EMBEDDING FOR NEW DRIVERS 
         # each learnt feature gets its own n+1 x j+1 matrix (where n is number of drivers and j is number of embeddings)
 # mayber random numbers inititally for embeddings instead of 0.5 ?
 # make loss function - huber loss
 # fix the data Huber Loss takes care of outliers so might aswell include non-green flag laps
-# optimiser = Adam
-# ITS NOT AUTOREGRESSIVE YET. it needs the previous lap as an input feature (first lap prev laptime = 0.0)
 # add the standings matrix
+# optimiser = Adam
 # training loop
 # add pitstops for specific laps
 # eval loop
