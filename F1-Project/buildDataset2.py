@@ -83,7 +83,6 @@ def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(
     frames = non_empty
 
     if not frames:
-        skip('', circuit, 'no years availible')
         return pd.DataFrame()
 
     data_frame = pd.concat(frames, ignore_index=True)
