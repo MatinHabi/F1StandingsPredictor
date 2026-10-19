@@ -21,11 +21,11 @@ from sklearn.preprocessing import OneHotEncoder
 # testing loop
 
 class Embeddings(nn.Module):
-    def __init__(self,driver_dim,car_dim,track_dim):
+    def __init__(self,dn, cn, tn, driver_dim,car_dim,track_dim):
         super().__init__()
-        self.driver_dim = nn.Parameter(torch.full((driver_dim,),0.5))
-        self.car_dim = nn.Parameter(torch.full((car_dim,),0.5))
-        self.track_dim = nn.Parameter(torch.full((track_dim,),0.5))
+        self.driver_dim = nn.Parameter(torch.randn(dn, driver_dim) * 0.1 )
+        self.car_dim = nn.Parameter(torch.randn(cn,car_dim) * 0.1)
+        self.track_dim = nn.Parameter(torch.randn(tn,track_dim) * 0.1)
 
     def forward(self,x):
         x = self.driver_dim(x)
