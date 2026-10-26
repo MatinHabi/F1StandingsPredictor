@@ -11,6 +11,8 @@ from scipy.stats import kendalltau
 f1.Cache.enable_cache("fastf1_cache")
 f1.set_log_level('WARNING')
 
+torch.manual_seed(42)
+
 ## TO DO:
 # ITS NOT AUTOREGRESSIVE YET. it needs the previous lap as an input feature (first lap prev laptime = 0.0) - DONE
     # add lag laps - DONE
@@ -205,7 +207,7 @@ X_train, driver_train, car_train, track_train = to_tensors(train)
 Y_train = torch.tensor(train['LapTime'].values, dtype=torch.float32).unsqueeze(1).to(device)
 
 #now to initialise the model
-DRIVER_EM = 2
+DRIVER_EM = 5
 CAR_EM = 2
 TRACK_EM = 2
 LR = 0.001
