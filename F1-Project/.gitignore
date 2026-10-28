@@ -19,3 +19,5 @@ all/
 .vscode/
 .DS_Store
 .DS_Store
+
+./model3.py

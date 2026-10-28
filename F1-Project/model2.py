@@ -44,7 +44,7 @@ class F1MLP(nn.Module):
 
 files = glob.glob("all2/*.csv")
 d = pd.concat([pd.read_csv(f) for f in files], ignore_index = True)
-d = d[['Driver','LapNumber','TyreLife','FuelLoad','Car','Track','Year','Race','LapTime']]
+d = d[['Driver','LapNumber','TyreLife','FuelLoad','Car','Track','Year','Race','TotalLaps','LapTime']]
 d = d.sort_values(['Year','Race','Driver','LapNumber']).reset_index(drop = True)
 d['LapNumber'] = d['LapNumber'].astype(int)
 
@@ -59,7 +59,7 @@ test_X , test_Y = test.drop(columns='LapTime'), test['LapTime']
 
 #onehot encoder
 encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
-encoder.fit(train['Race'])
+encoder.fit(train[['Race']])
 
 #making the defualt embeddings for any track/driver/car the model hasnt seen before
 def make_index(col):
@@ -86,7 +86,7 @@ def to_tensor(frame):
     num['LapNumber'] = (frame['LapNumber'] - lap_mu)/lap_std
     num['TyreLife'] = (frame['TyreLife'] - tyreLife_mu) / tyreLife_std
     num['FuelLoad'] = frame['FuelLoad']
-    oneHotFeatures = encoder.transform(frame['Race'])
+    oneHotFeatures = encoder.transform(frame[['Race']])
     X = np.concatenate([num.values, oneHotFeatures], axis=1)
     X = torch.tensor(X,dtype=torch.float32).to(device)
     driver = torch.tensor(frame['Driver'].map(driver_index).fillna(0).astype(int).values).to(device)
@@ -97,14 +97,29 @@ def to_tensor(frame):
 PIT_LAPS = [20,40]
 PIT_LOSS = 20
 
+#getting the most rececnt pit stop
+def get_last_pit(lap):
+    pit = 0
+    if lap < 20:
+        pit = 0
+    elif lap >=20 and lap < 40:
+        pit = 20
+    elif lap >= 40:
+        pit = 40
+    
+    return pit
+
+
 def simulate_race(model, race):
-    total_laps = int(race['TotalLaps'])
+    total_laps = int(race['TotalLaps'].iloc[0])
     rows = []
+
     for driver, laps in race.groupby('Driver'):
         for lap in range(1 + total_laps + 1):
             rows.append({
                 'Driver': driver,
                 'LapNumber': lap,
+                'TyreLife': 1 - ((lap - get_last_pit(lap))/ total_laps),
                 'FuelLoad': (total_laps - lap) / total_laps,
                 'Car': laps['Car'].iloc[0],
                 'Track': laps['Track'].iloc[0],
@@ -112,12 +127,39 @@ def simulate_race(model, race):
         })
 
     sim = pd.DataFrame(rows)
-    sim['PredLapTime'] = np.nan
 
-    prev = {}
+    #simulating non-autoregressively (no previousl lap time) - this gets the model to predict lap-time from driver skill & embeddings
     model.eval()
     with torch.no_grad():
-        for lap in range(1,total_laps + 1):
-            rows_now = (sim['LapNumber'] == lap) #creating a mask for the laps we're currently on
-            now = sim[rows_now].copy() #creating a coopy of the dataframe with just the data for the lap we're on
-            now
+        X, driver, car, track = to_tensor(sim)
+        pred = model(X,driver,car,track)
+        sim['PredLapTime'] = pred.squeeze(1).cpu().numpy()
+    return sim
+
+#getting the final standings from sim
+def standings(sim):
+    matrix = sim.pivot(index = 'Driver', columns = 'LapNumber' , values = 'PredLapTime') #changes the matrix to a Driver X LapTime instead of 1 row per driver per lap
+    race_time = matrix.sum(axis = 1) + len(PIT_LAPS) * PIT_LOSS #drivers true lap time + pit loss
+    table = pd.DataFrame({'Driver': matrix.index, 'TotalTime': race_time.values})
+    table = table.sort_values('RaceTime').reset_index(drop=True)
+    table['Position'] = table.index + 1
+    return table
+
+def actual_results(year, race_name):
+    #real finishing order from the fastf1 cache
+        session = f1.get_session(year, race_name, 'R')
+        session.load(laps=False, telemetry=False, weather=False, messages=False)
+        results = session.results
+        #only classified drivers (retired ones removed)
+        position = pd.to_numeric(results['ClassifiedPosition'], errors='coerce')
+        classified = results[position.notna()]
+        #grid position for the baseline, pit lane starts (0) count as starting last
+        grid = classified['GridPosition'].replace(0, 99).fillna(99)
+
+        return pd.DataFrame({
+            'Driver': classified['Abbreviation'],
+            'ActualPosition': classified['ClassifiedPosition'].astype(int),
+            'GridPosition': grid,
+        })
+
+
