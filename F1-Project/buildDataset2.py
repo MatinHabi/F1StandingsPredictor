@@ -43,22 +43,13 @@ def basic_structure(circuit, session_type='R', year=2024):
     weather = session.weather_data[['Time', 'TrackTemp']].sort_values('Time')
     laps = pd.merge_asof(laps.dropna(subset=['Time']).sort_values('Time'), weather, on='Time', direction='backward')
 
-    # filters, not features: keep clean green-flag laps only
-    # green = (
-    #     laps['TrackStatus']
-    #     & laps['PrevTrackStatus']
-    #     & (laps['IsAccurate'] == True)
-    #     & laps['PitInTime'].isna()       # in-lap
-    #     & laps['PitOutTime'].isna()      # out-lap
-    #     & laps['Compound'].notna()
-    # )
     #df = laps.loc[green, ['Driver', 'Team', 'LapNumber', 'Compound', 'TyreLife', 'TrackTemp', 'LapTime']].copy()
     df = laps.loc[:,['Driver', 'Team', 'LapNumber', 'Compound', 'TyreLife', 'TrackTemp', 'LapTime']]
     df['LapTime'] = df['LapTime'].dt.total_seconds()
 
     # fuel load 1.0 at lights-out, 0.0 at the flag
     df['FuelLoad'] = (total_laps - df['LapNumber']) / total_laps
-
+    df['TotalLaps'] = total_laps
     # embedding keys
     df['Car'] = df['Team']
     df['Track'] = track_key(session, year)

@@ -101,7 +101,7 @@ def to_tensors(frame):
     num['TyreLife'] = (frame['TyreLife'] - tyreLife_mean)/tyreLife_std
     num['TrackTemp'] = (frame['TrackTemp'] - trackTemp_mean)/trackTemp_std
     num['FuelLoad'] = frame['FuelLoad']
-    num['PrevLapTime'] = ((frame['PrevLapTime'] - lapTime_mean)/lapTime_std).fillna(0.0)
+    #num['PrevLapTime'] = ((frame['PrevLapTime'] - lapTime_mean)/lapTime_std).fillna(0.0)
     oneHotFeatures = encoder.transform(frame[['Compound', 'Race']])
     X = np.concatenate([num.values, oneHotFeatures], axis=1)
     X = torch.tensor(X, dtype=torch.float32).to(device)
@@ -207,8 +207,8 @@ X_train, driver_train, car_train, track_train = to_tensors(train)
 Y_train = torch.tensor(train['LapTime'].values, dtype=torch.float32).unsqueeze(1).to(device)
 
 #now to initialise the model
-DRIVER_EM = 5
-CAR_EM = 2
+DRIVER_EM = 0
+CAR_EM = 0
 TRACK_EM = 2
 LR = 0.001
 EPOCHS = 20
