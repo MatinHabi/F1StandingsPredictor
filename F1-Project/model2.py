@@ -205,7 +205,7 @@ CAR_EM = 3
 TRACK_EM = 3
 HIDDEN = 32
 LR = 0.001
-EPOCHS = 20
+EPOCH = 20
 BATCH = 256
 NEW_P = 0.05 #chance a training row uses the default embedding so it learns an average driver/car/track
 n = X_train.shape[1]
@@ -215,4 +215,18 @@ model.output.bias.data.fill_(lapTime_mu) #weight usually start very close to 0, 
 
 optimiser = torch.optim.Adam(model.parameters(), lr = LR)
 dataset = TensorDataset(X_train, driver_train, car_train, track_train, Y_train)
-loeader = DataLoader(dataset, batch_size=BATCH, shuffle= True)
+loader = DataLoader(dataset, batch_size=BATCH, shuffle= True)
+
+for e in range(EPOCH):
+    model.train()
+    running_loss = 0.0
+    for x, d, c, t, y in loader:
+        pred = model(x,d,c,t,y)
+        loss = loss_fn(pred,y)
+        optimiser.zero_grad()
+        loss.backward()
+        optimiser.step()
+        running_loss += loss.item() * len(y)
+    print(f'epoch: {e} || training_loss: {running_loss/len(train)}')
+
+
