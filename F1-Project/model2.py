@@ -12,6 +12,7 @@ f1.Cache.enable_cache("fastf1_cache")
 f1.set_log_level('WARNING') #only print warning messages
 
 torch.manual_seed(42)
+loss_fn = nn.HuberLoss()
 
 class Embedding(nn.Module):
     def __init__(self,dn,cn,tn,driver_dim,car_dim,track_dim):
@@ -53,9 +54,6 @@ train = d[d['Year'] <= 2023].reset_index(drop=True)
 val = d[d['Year'] == 2024].reset_index(drop=True)
 test = d[d['Year'] == 2025].reset_index(drop=True)
 
-train_X , train_Y = train.drop(columns='LapTime') , train['LapTime']
-val_X , val_Y = val.drop(columns='LapTime'), val['LapTime']
-test_X , test_Y = test.drop(columns='LapTime'), test['LapTime']
 
 #onehot encoder
 encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
@@ -119,7 +117,7 @@ def simulate_race(model, race):
             rows.append({
                 'Driver': driver,
                 'LapNumber': lap,
-                'TyreLife': 1 - ((lap - get_last_pit(lap))/ total_laps),
+                'TyreLife': lap - get_last_pit(lap),
                 'FuelLoad': (total_laps - lap) / total_laps,
                 'Car': laps['Car'].iloc[0],
                 'Track': laps['Track'].iloc[0],
@@ -134,6 +132,7 @@ def simulate_race(model, race):
         X, driver, car, track = to_tensor(sim)
         pred = model(X,driver,car,track)
         sim['PredLapTime'] = pred.squeeze(1).cpu().numpy()
+
     return sim
 
 #getting the final standings from sim
@@ -162,4 +161,58 @@ def actual_results(year, race_name):
             'GridPosition': grid,
         })
 
+#this will run the races for evaluation and testing and print the kendall tau results
+def run_races(model, frame, name): 
+    total_loss = 0
+    count = 0
+    taus = []
+    grid_taus = []
 
+    for (year, race_name), race in frame.groupby(['Year', 'Race']):
+        sim = simulate_race(model,race) #gets predicted lap time from simultaion
+
+        #becuase original table has gaps but model predicts every lap we merge the tables and only compare the rows that exist for both
+        both = race.merge(sim[['Driver', 'LapNumber', 'PredLapTine']], on = ['Driver', 'LapNumber']) #holds one race and is merged with prediction for said race
+        pred = torch.tensor(both['PredLapTime'].values)
+        real = torch.tensor(both['LapTime'].values)
+        loss = loss_fn(pred,real)
+        total_loss += loss.item() * len(both) # Huber loss usually gives an average loss throughout the race * by the total laps in the season to get the real value not the average
+        count += len(both) # keeps track of the number of laps in the entire season
+
+        #kendall's taugh: predicted order vs actual order
+        table = standings(sim) # final predicted standings using simulated results
+        positions = table.merge(actual_results(year,race_name), on = 'Driver')
+        tau = kendalltau(positions['Position'], positions['ActualPosition']).statistic #kendall tau returns object (result.statistic , result.pvalue) - .statistic is the actual tau result and .pvalue is the likelihood that result is luck
+        taus.append(tau)
+
+        #the baseline: starting grid position - aim is to be better than this
+        grid_tau = kendalltau(positions['GridPosition'], positions['ActualPosition']).statistic
+        grid_taus.append(grid_tau)
+
+        print(f'\n{year} {race_name}')
+        print(table[['Position', 'Driver', 'TotalTime']].to_string(index=False))
+        print(f'tau: {tau:.3f} (grid baseline: {grid_tau:.3f})')
+
+    print(f'\n{name} loss: {total_loss/count:.3f}')
+    print(f'{name} mean tau: {np.mean(taus):.3f}')
+    print(f'{name} mean grid baseline tau: {np.mean(grid_taus):.3f}')
+
+X_train, driver_train, car_train, track_train = to_tensor(train)
+Y_train = torch.tensor(train['LapTime'], dtype = torch.float32).unsqueeze(1).to(device)
+
+DRIVER_EM = 5
+CAR_EM = 3
+TRACK_EM = 3
+HIDDEN = 32
+LR = 0.001
+EPOCHS = 20
+BATCH = 256
+NEW_P = 0.05 #chance a training row uses the default embedding so it learns an average driver/car/track
+n = X_train.shape[1]
+
+model = F1MLP(len(driver_index), len(car_index), len(track_index), DRIVER_EM, CAR_EM, TRACK_EM, n, HIDDEN, 1).to(device)
+model.output.bias.data.fill_(lapTime_mu) #weight usually start very close to 0, whereas average laptimes are ~90 seconds. considering huber loss caps how hard each error pushes & LR is small the model wastes epochs trying to get predictions closer to ~90s. this line sets the bias to 90 so first prediction is already close to the average
+
+optimiser = torch.optim.Adam(model.parameters(), lr = LR)
+dataset = TensorDataset(X_train, driver_train, car_train, track_train, Y_train)
+loeader = DataLoader(dataset, batch_size=BATCH, shuffle= True)
