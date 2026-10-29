@@ -36,8 +36,8 @@ class F1MLP(nn.Module):
         self.hidden2 = nn.Linear(hidden_dim, hidden_dim // 2)
         self.output = nn.Linear(hidden_dim // 2 , output_dim)
 
-    def forward(self,driver, car, track):
-        x = torch.cat([x,self.embeddings(driver, car, track)], dim = 1)
+    def forward(self, input_data, driver, car, track):
+        x = torch.cat([input_data,self.embeddings(driver, car, track)], dim = 1)
         x = torch.relu(self.hidden1(x))
         x = torch.relu(self.hidden2(x))
         x = self.output(x)
@@ -140,7 +140,7 @@ def standings(sim):
     matrix = sim.pivot(index = 'Driver', columns = 'LapNumber' , values = 'PredLapTime') #changes the matrix to a Driver X LapTime instead of 1 row per driver per lap
     race_time = matrix.sum(axis = 1) + len(PIT_LAPS) * PIT_LOSS #drivers true lap time + pit loss
     table = pd.DataFrame({'Driver': matrix.index, 'TotalTime': race_time.values})
-    table = table.sort_values('RaceTime').reset_index(drop=True)
+    table = table.sort_values('TotalTime').reset_index(drop=True)
     table['Position'] = table.index + 1
     return table
 
@@ -172,7 +172,7 @@ def run_races(model, frame, name):
         sim = simulate_race(model,race) #gets predicted lap time from simultaion
 
         #becuase original table has gaps but model predicts every lap we merge the tables and only compare the rows that exist for both
-        both = race.merge(sim[['Driver', 'LapNumber', 'PredLapTine']], on = ['Driver', 'LapNumber']) #holds one race and is merged with prediction for said race
+        both = race.merge(sim[['Driver', 'LapNumber', 'PredLapTime']], on = ['Driver', 'LapNumber']) #holds one race and is merged with prediction for said race
         pred = torch.tensor(both['PredLapTime'].values)
         real = torch.tensor(both['LapTime'].values)
         loss = loss_fn(pred,real)
@@ -200,9 +200,9 @@ def run_races(model, frame, name):
 X_train, driver_train, car_train, track_train = to_tensor(train)
 Y_train = torch.tensor(train['LapTime'], dtype = torch.float32).unsqueeze(1).to(device)
 
-DRIVER_EM = 5
-CAR_EM = 3
-TRACK_EM = 3
+DRIVER_EM = 100
+CAR_EM = 100
+TRACK_EM = 50
 HIDDEN = 32
 LR = 0.001
 EPOCH = 20
@@ -217,16 +217,16 @@ optimiser = torch.optim.Adam(model.parameters(), lr = LR)
 dataset = TensorDataset(X_train, driver_train, car_train, track_train, Y_train)
 loader = DataLoader(dataset, batch_size=BATCH, shuffle= True)
 
-for e in range(EPOCH):
-    model.train()
-    running_loss = 0.0
-    for x, d, c, t, y in loader:
-        pred = model(x,d,c,t,y)
-        loss = loss_fn(pred,y)
-        optimiser.zero_grad()
-        loss.backward()
-        optimiser.step()
-        running_loss += loss.item() * len(y)
-    print(f'epoch: {e} || training_loss: {running_loss/len(train)}')
-
+def training():
+    for e in range(EPOCH):
+        model.train()
+        running_loss = 0.0
+        for x, d, c, t, y in loader:
+            pred = model(x,d,c,t)
+            loss = loss_fn(pred,y)
+            optimiser.zero_grad()
+            loss.backward()
+            optimiser.step()
+            running_loss += loss.item() * len(y)
+        print(f'epoch: {e} || training_loss: {running_loss/len(train)}')
 

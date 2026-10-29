@@ -61,7 +61,7 @@ def basic_structure(circuit, session_type='R', year=2024):
     return df[[c for c in df.columns if c != 'LapTime'] + ['LapTime']]
 
 
-def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(2018, 2027), name=None):
+def build_dataset(circuit='Melbourne', driver='', session_type='R', years=range(2018, 2026), name=None):
     frames = []
     for y in years:
         frames.append(basic_structure(circuit,session_type,y))

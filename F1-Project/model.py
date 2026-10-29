@@ -262,9 +262,9 @@ X_train, driver_train, car_train, track_train = to_tensor(train)
 Y_train = torch.tensor(train['LapTime'].values, dtype=torch.float32).unsqueeze(1).to(device)
 
 #settings
-DRIVER_EM = 0
-CAR_EM = 0
-TRACK_EM = 2
+DRIVER_EM = 100
+CAR_EM = 100
+TRACK_EM = 50
 LR = 0.001
 EPOCHS = 20
 BATCH = 256
