@@ -45,7 +45,7 @@ class F1MLP(nn.Module):
 
 files = glob.glob("all2/*.csv")
 d = pd.concat([pd.read_csv(f) for f in files], ignore_index = True)
-d = d[['Driver','LapNumber','TyreLife','FuelLoad','Car','Track','Year','Race','TotalLaps','LapTime']]
+d = d[['Driver','LapNumber','Compound','TyreLife','FuelLoad','Car','Track','Year','Race','TotalLaps','LapTime']]
 d = d.sort_values(['Year','Race','Driver','LapNumber']).reset_index(drop = True)
 d['LapNumber'] = d['LapNumber'].astype(int)
 
@@ -92,19 +92,80 @@ def to_tensor(frame):
     track = torch.tensor(frame['Track'].map(track_index).fillna(0).astype(int).values).to(device)
     return X, driver, car, track
 
-PIT_LAPS = [20,40]
+PIT_LAPS = [20,40] #fallback for a team that has no dry finish at the track in training
 PIT_LOSS = 20
 
-#getting the most rececnt pit stop
-def get_last_pit(lap):
+#teams get renamed, so map old names to the current one or each era counts as a different team
+TEAM_ALIASES = {
+    'Toro Rosso': 'RB', 'AlphaTauri': 'RB', 'Racing Bulls': 'RB',
+    'Force India': 'Aston Martin', 'Racing Point': 'Aston Martin',
+    'Renault': 'Alpine',
+    'Sauber': 'Kick Sauber', 'Alfa Romeo Racing': 'Kick Sauber', 'Alfa Romeo': 'Kick Sauber',
+}
+#same for tracks the data names differently in some years
+TRACK_ALIASES = {'Monte Carlo': 'Monaco', 'Miami Gardens': 'Miami'}
+DRY = ['SOFT', 'MEDIUM', 'HARD']
+
+#one row per driver per race: the compound sequence and the pit laps
+def summarise(s):
+    return pd.Series({
+        'Strategy': '-'.join(s['Compound']),
+        'Stops': len(s) - 1,
+        'PitLaps': list(s['EndLap'].iloc[:-1]),
+        'PitPct': [round(l / s['TotalLaps'].iloc[0], 2) for l in s['EndLap'].iloc[:-1]],
+        'Finished': s['EndLap'].iloc[-1] >= 0.9 * s['TotalLaps'].iloc[0],
+        'Dry': s['Compound'].isin(DRY).all(),
+    })
+
+#per team per track: most used strategy, then the median pit laps of the drivers who ran it
+def most_common(r):
+    top = r['Strategy'].value_counts()
+    best = top.index[0]
+    used = r[r['Strategy'] == best]
+    pit_laps = pd.DataFrame(used['PitLaps'].tolist()).median().round().astype(int).tolist()
+    pit_pct = pd.DataFrame(used['PitPct'].tolist()).median().round(2).tolist()
+    return pd.Series({'Strategy': best, 'TimesUsed': top.iloc[0], 'OutOf': len(r),
+                      'PitLaps': pit_laps, 'PitPct': pit_pct})
+
+#building every teams most used strategy at every track
+def get_strategies(frame):
+    s = frame.copy()
+    s['Car'] = s['Car'].replace(TEAM_ALIASES)
+    s['Track'] = s['Track'].replace(TRACK_ALIASES)
+    s['Compound'] = s['Compound'].fillna('UNKNOWN')
+
+    #new stint = compound changed or tyre life went down (catches same compound swaps too)
+    g = s.groupby(['Year', 'Race', 'Driver'])
+    new_stint = (s['Compound'] != g['Compound'].shift()) | (s['TyreLife'] < g['TyreLife'].shift())
+    s['Stint'] = new_stint.astype(int).groupby([s['Year'], s['Race'], s['Driver']]).cumsum()
+
+    #one row per stint: compound and the lap it ended on (= the pit lap, except the last stint)
+    stints = (s.groupby(['Year', 'Race', 'Track', 'Car', 'Driver', 'Stint'])
+                .agg(Compound=('Compound', 'first'), EndLap=('LapNumber', 'max'), TotalLaps=('TotalLaps', 'first'))
+                .reset_index())
+
+    races = stints.groupby(['Year', 'Race', 'Track', 'Car', 'Driver']).apply(summarise, include_groups=False).reset_index()
+    #DNFs and wet races aren't real strategies
+    races = races[races['Finished'] & races['Dry']]
+    return races.groupby(['Track', 'Car']).apply(most_common, include_groups=False).reset_index()
+
+team_strategy = get_strategies(train) #only the training years so the 2024/2025 strategies dont leak into eval/test
+
+#getting the teams usual pit laps at this track, scaled to this races length
+def get_pit_laps(car, track, total_laps):
+    car = TEAM_ALIASES.get(car, car)
+    track = TRACK_ALIASES.get(track, track)
+    strategy = team_strategy[(team_strategy['Track'] == track) & (team_strategy['Car'] == car)]
+    if len(strategy) == 0:
+        return PIT_LAPS
+    return [round(p * total_laps) for p in strategy['PitPct'].iloc[0]]
+
+#getting the most rececnt pit stop - the pit lap is the last lap on the old tyres
+def get_last_pit(lap, pits):
     pit = 0
-    if lap < 20:
-        pit = 0
-    elif lap >=20 and lap < 40:
-        pit = 20
-    elif lap >= 40:
-        pit = 40
-    
+    for p in pits:
+        if lap > p:
+            pit = p
     return pit
 
 
@@ -113,11 +174,13 @@ def simulate_race(model, race):
     rows = []
 
     for driver, laps in race.groupby('Driver'):
+        pits = get_pit_laps(laps['Car'].iloc[0], laps['Track'].iloc[0], total_laps) #each driver runs their teams usual strategy
         for lap in range(1 + total_laps + 1):
             rows.append({
                 'Driver': driver,
                 'LapNumber': lap,
-                'TyreLife': lap - get_last_pit(lap),
+                'TyreLife': lap - get_last_pit(lap, pits),
+                'Stops': len(pits),
                 'FuelLoad': (total_laps - lap) / total_laps,
                 'Car': laps['Car'].iloc[0],
                 'Track': laps['Track'].iloc[0],
@@ -138,7 +201,7 @@ def simulate_race(model, race):
 #getting the final standings from sim
 def standings(sim):
     matrix = sim.pivot(index = 'Driver', columns = 'LapNumber' , values = 'PredLapTime') #changes the matrix to a Driver X LapTime instead of 1 row per driver per lap
-    race_time = matrix.sum(axis = 1) + len(PIT_LAPS) * PIT_LOSS #drivers true lap time + pit loss
+    race_time = matrix.sum(axis = 1) + sim.groupby('Driver')['Stops'].first() * PIT_LOSS #drivers true lap time + pit loss for each of their stops
     table = pd.DataFrame({'Driver': matrix.index, 'TotalTime': race_time.values})
     table = table.sort_values('TotalTime').reset_index(drop=True)
     table['Position'] = table.index + 1
