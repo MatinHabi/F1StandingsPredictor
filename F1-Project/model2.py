@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 import glob
+import os
+import time
 import fastf1 as f1
 from scipy.stats import kendalltau
 
@@ -43,11 +45,59 @@ class F1MLP(nn.Module):
         x = self.output(x)
         return x
 
+#teams get renamed, so map old names to the current one or each era counts as a different team
+TEAM_ALIASES = {
+    'Toro Rosso': 'RB', 'AlphaTauri': 'RB', 'Racing Bulls': 'RB',
+    'Force India': 'Aston Martin', 'Racing Point': 'Aston Martin',
+    'Renault': 'Alpine',
+    'Sauber': 'Kick Sauber', 'Alfa Romeo Racing': 'Kick Sauber', 'Alfa Romeo': 'Kick Sauber',
+}
+#same for tracks the data names differently in some years
+TRACK_ALIASES = {'Monte Carlo': 'Monaco', 'Miami Gardens': 'Miami'}
+
 files = glob.glob("all2/*.csv")
 d = pd.concat([pd.read_csv(f) for f in files], ignore_index = True)
 d = d[['Driver','LapNumber','Compound','TyreLife','FuelLoad','Car','Track','Year','Race','TotalLaps','LapTime']]
 d = d.sort_values(['Year','Race','Driver','LapNumber']).reset_index(drop = True)
 d['LapNumber'] = d['LapNumber'].astype(int)
+#renamed teams/tracks share one embedding instead of the new name falling back to the default one
+d['Car'] = d['Car'].replace(TEAM_ALIASES)
+d['Track'] = d['Track'].replace(TRACK_ALIASES)
+
+#each drivers best qualifying lap (Q1/Q2/Q3) as a % gap to the fastest qualifying lap - its known before the race so nothing leaks
+#saved to a csv so fastf1 only has to download the qualifying sessions once
+QUALI_FILE = 'quali_gaps.csv'
+def get_quali_gaps(frame):
+    if os.path.exists(QUALI_FILE):
+        return pd.read_csv(QUALI_FILE)
+    rows = []
+    for (year, race_name), _ in frame.groupby(['Year', 'Race']):
+        while True:
+            try:
+                session = f1.get_session(year, race_name, 'Q')
+                session.load(laps=False, telemetry=False, weather=False, messages=False)
+                break
+            except Exception as e:
+                if '500 calls/h' in str(e): #same as build_all_data - fastf1 only allows 500 calls an hour
+                    print('rate limited, sleeping 1h...')
+                    time.sleep(3600)
+                else:
+                    raise
+        results = session.results
+        best = results[['Q1', 'Q2', 'Q3']].min(axis = 1).dt.total_seconds()
+        rows.append(pd.DataFrame({
+            'Year': year,
+            'Race': race_name,
+            'Driver': results['Abbreviation'].values,
+            'QualiGap': ((best / best.min() - 1) * 100).values,
+        }))
+    gaps = pd.concat(rows, ignore_index = True)
+    gaps.to_csv(QUALI_FILE, index = False)
+    return gaps
+
+d = d.merge(get_quali_gaps(d), on = ['Year', 'Race', 'Driver'], how = 'left')
+d['QualiGap'] = d['QualiGap'].fillna(d.groupby(['Year', 'Race'])['QualiGap'].transform('max')) #no qualifying time = slowest in that session
+d['QualiGap'] = d['QualiGap'].clip(upper = 7) #107% rule - anything slower is a wet/mixed session or a problem lap, not pace
 
 #split by year
 train = d[d['Year'] <= 2023].reset_index(drop=True)
@@ -75,6 +125,7 @@ track_index = make_index('Track')
 lap_mu, lap_std = train['LapNumber'].mean(), train['LapNumber'].std()
 tyreLife_mu, tyreLife_std = train['TyreLife'].mean() , train['TyreLife'].std()
 lapTime_mu, lapTime_std = train['LapTime'].mean(), train['LapTime'].std()
+quali_mu, quali_std = train['QualiGap'].mean(), train['QualiGap'].std()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -84,6 +135,7 @@ def to_tensor(frame):
     num['LapNumber'] = (frame['LapNumber'] - lap_mu)/lap_std
     num['TyreLife'] = (frame['TyreLife'] - tyreLife_mu) / tyreLife_std
     num['FuelLoad'] = frame['FuelLoad']
+    num['QualiGap'] = ((frame['QualiGap'] - quali_mu) / quali_std).fillna(0.0) #whole session missing = average gap
     oneHotFeatures = encoder.transform(frame[['Race']])
     X = np.concatenate([num.values, oneHotFeatures], axis=1)
     X = torch.tensor(X,dtype=torch.float32).to(device)
@@ -95,15 +147,6 @@ def to_tensor(frame):
 PIT_LAPS = [20,40] #fallback for a team that has no dry finish at the track in training
 PIT_LOSS = 20
 
-#teams get renamed, so map old names to the current one or each era counts as a different team
-TEAM_ALIASES = {
-    'Toro Rosso': 'RB', 'AlphaTauri': 'RB', 'Racing Bulls': 'RB',
-    'Force India': 'Aston Martin', 'Racing Point': 'Aston Martin',
-    'Renault': 'Alpine',
-    'Sauber': 'Kick Sauber', 'Alfa Romeo Racing': 'Kick Sauber', 'Alfa Romeo': 'Kick Sauber',
-}
-#same for tracks the data names differently in some years
-TRACK_ALIASES = {'Monte Carlo': 'Monaco', 'Miami Gardens': 'Miami'}
 DRY = ['SOFT', 'MEDIUM', 'HARD']
 
 #one row per driver per race: the compound sequence and the pit laps
@@ -175,7 +218,7 @@ def simulate_race(model, race):
 
     for driver, laps in race.groupby('Driver'):
         pits = get_pit_laps(laps['Car'].iloc[0], laps['Track'].iloc[0], total_laps) #each driver runs their teams usual strategy
-        for lap in range(1 + total_laps + 1):
+        for lap in range(1, total_laps + 1):
             rows.append({
                 'Driver': driver,
                 'LapNumber': lap,
@@ -185,6 +228,7 @@ def simulate_race(model, race):
                 'Car': laps['Car'].iloc[0],
                 'Track': laps['Track'].iloc[0],
                 'Race': laps['Race'].iloc[0],
+                'QualiGap': laps['QualiGap'].iloc[0],
         })
 
     sim = pd.DataFrame(rows)
@@ -256,9 +300,16 @@ def run_races(model, frame, name):
         print(table[['Position', 'Driver', 'TotalTime']].to_string(index=False))
         print(f'tau: {tau:.3f} (grid baseline: {grid_tau:.3f})')
 
+    #how many races the model ordered better than the grid did (a tie doesnt count)
+    beat_grid = 0
+    for tau, grid_tau in zip(taus, grid_taus):
+        if tau > grid_tau:
+            beat_grid += 1
+
     print(f'\n{name} loss: {total_loss/count:.3f}')
     print(f'{name} mean tau: {np.mean(taus):.3f}')
     print(f'{name} mean grid baseline tau: {np.mean(grid_taus):.3f}')
+    print(f'{name} races beating the grid baseline: {beat_grid}/{len(taus)}')
 
 X_train, driver_train, car_train, track_train = to_tensor(train)
 Y_train = torch.tensor(train['LapTime'], dtype = torch.float32).unsqueeze(1).to(device)
@@ -271,22 +322,28 @@ LR = 0.001
 EPOCH = 20
 BATCH = 256
 NEW_P = 0.05 #chance a training row uses the default embedding so it learns an average driver/car/track
+YEAR_DECAY = 0.5 #each year older counts this much less in the loss, so the car embeddings lean towards recent form
 n = X_train.shape[1]
 
 model = F1MLP(len(driver_index), len(car_index), len(track_index), DRIVER_EM, CAR_EM, TRACK_EM, n, HIDDEN, 1).to(device)
 model.output.bias.data.fill_(lapTime_mu) #weight usually start very close to 0, whereas average laptimes are ~90 seconds. considering huber loss caps how hard each error pushes & LR is small the model wastes epochs trying to get predictions closer to ~90s. this line sets the bias to 90 so first prediction is already close to the average
 
 optimiser = torch.optim.Adam(model.parameters(), lr = LR)
-dataset = TensorDataset(X_train, driver_train, car_train, track_train, Y_train)
+W_train = torch.tensor(YEAR_DECAY ** (train['Year'].max() - train['Year']).values, dtype = torch.float32).unsqueeze(1).to(device)
+dataset = TensorDataset(X_train, driver_train, car_train, track_train, Y_train, W_train)
 loader = DataLoader(dataset, batch_size=BATCH, shuffle= True)
 
 def training():
     for e in range(EPOCH):
         model.train()
         running_loss = 0.0
-        for x, d, c, t, y in loader:
+        for x, d, c, t, y, w in loader:
+            #sometimes swap in the default embedding (index 0) so rookies/new teams get an average driver/car/track
+            d = torch.where(torch.rand(len(d), device=device) < NEW_P, 0, d)
+            c = torch.where(torch.rand(len(c), device=device) < NEW_P, 0, c)
+            t = torch.where(torch.rand(len(t), device=device) < NEW_P, 0, t)
             pred = model(x,d,c,t)
-            loss = loss_fn(pred,y)
+            loss = (nn.functional.huber_loss(pred, y, reduction = 'none') * w).sum() / w.sum() #weighted huber loss
             optimiser.zero_grad()
             loss.backward()
             optimiser.step()
