@@ -326,7 +326,12 @@ YEAR_DECAY = 0.5 #each year older counts this much less in the loss, so the car 
 n = X_train.shape[1]
 
 model = F1MLP(len(driver_index), len(car_index), len(track_index), DRIVER_EM, CAR_EM, TRACK_EM, n, HIDDEN, 1).to(device)
-model.output.bias.data.fill_(lapTime_mu) #weight usually start very close to 0, whereas average laptimes are ~90 seconds. considering huber loss caps how hard each error pushes & LR is small the model wastes epochs trying to get predictions closer to ~90s. this line sets the bias to 90 so first prediction is already close to the average
+model.output.bias.data.fill_(lapTime_mu) #weight usually start very close to 0, 
+                                         # whereas average laptimes are ~90 seconds. 
+                                         # considering huber loss caps how hard each error pushes & LR 
+                                         # is small the model wastes epochs trying to get predictions 
+                                         # closer to ~90s. this line sets the bias to 90 so first 
+                                         # prediction is already close to the average
 
 optimiser = torch.optim.Adam(model.parameters(), lr = LR)
 W_train = torch.tensor(YEAR_DECAY ** (train['Year'].max() - train['Year']).values, dtype = torch.float32).unsqueeze(1).to(device)
