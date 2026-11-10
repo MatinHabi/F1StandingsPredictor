@@ -238,7 +238,7 @@ def simulate_race(model, race):
     with torch.no_grad():
         X, driver, car, track = to_tensor(sim)
         pred = model(X,driver,car,track)
-        sim['PredLapTime'] = pred.squeeze(1).cpu().numpy()
+        sim['PredLapTime'] = pred.squeeze(1).cpu().numpy() * (1 + sim['QualiGap'].fillna(quali_mu).values / 100) #putting the drivers qualifying gap back on - whole session missing = average gap
 
     return sim
 
@@ -312,7 +312,7 @@ def run_races(model, frame, name):
     print(f'{name} races beating the grid baseline: {beat_grid}/{len(taus)}')
 
 X_train, driver_train, car_train, track_train = to_tensor(train)
-Y_train = torch.tensor(train['LapTime'], dtype = torch.float32).unsqueeze(1).to(device)
+Y_train = torch.tensor(train['LapTime'] / (1 + train['QualiGap'] / 100), dtype = torch.float32).unsqueeze(1).to(device) #removing the drivers qualifying gap from the lap time, so the model only learns what qualifying doesnt already tell it
 
 DRIVER_EM = 100
 CAR_EM = 100
